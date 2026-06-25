@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Save to Obsidian — Settings</title>
+  <link rel="stylesheet" href="options.css" />
+</head>
+<body>
+  <div class="card">
+    <header class="head">
+      <img class="logo" src="icons/icon48.png" alt="" />
+      <div>
+        <h1>Save to Obsidian</h1>
+        <p class="sub">Writes links straight into your vault on disk — works offline, no plugins.</p>
+      </div>
+    </header>
+
+    <!-- Vault folder -->
+    <section class="row">
+      <div class="row-label">
+        <span class="row-title">Vault folder</span>
+        <span class="row-desc">Pick the root folder of your Obsidian vault.</span>
+      </div>
+      <div class="row-control">
+        <div class="folder-pill" id="folder-pill">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span id="folder-name">No folder selected</span>
+        </div>
+        <button id="pick-btn" class="btn ghost">Choose…</button>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Destination note -->
+    <section class="row">
+      <div class="row-label">
+        <span class="row-title">Destination note</span>
+        <span class="row-desc">Path inside the vault. Subfolders OK, e.g. <code>Inbox/Bookmarks.md</code>.</span>
+      </div>
+      <div class="row-control">
+        <input id="notePath" type="text" placeholder="Bookmarks.md" />
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Default tags -->
+    <section class="row">
+      <div class="row-label">
+        <span class="row-title">Default tags</span>
+        <span class="row-desc">Added to every saved link (optional).</span>
+      </div>
+      <div class="row-control">
+        <input id="defaultTags" type="text" placeholder="web-clip" />
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span id="status" class="status" role="status"></span>
+      <button id="save-btn" class="btn primary">Save settings</button>
+    </footer>
+  </div>
+
+  <script src="fs.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
