@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <meta name="description" content="A little home for everything worth coming back to. Amith's personal reading library, connected to Notion.">
+  <title>Amith's library — Second Brain</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="books.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="/" class="brand" aria-label="Library home"><span class="library-mark" aria-hidden="true">▥</span> SECOND BRAIN <span class="brand-divider">/</span> <span class="brand-light">PERSONAL LIBRARY</span></a>
+      <div class="topbar-actions"><button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">☾</button><button class="connection-status" id="connection-button" aria-label="View Notion connection status"><span class="status-dot"></span><span id="connection-label">Notion snapshot</span><span class="small-arrow">↗</span></button></div>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-text">
+          <p class="eyebrow">A COLLECTION OF GOOD FINDS</p>
+          <h1 id="page-title">Amith's <em>library.</em></h1>
+          <p class="hero-description">Good finds become chapters. Curiosity becomes a collection.</p>
+          <div class="stats" id="stats" aria-live="polite"></div>
+        </div>
+        <div class="hero-aside">
+          <div class="paper-note"><span class="note-pin" aria-hidden="true"></span><span class="note-star" aria-hidden="true">✳</span><p>Stay curious.<br>Save the good stuff.</p><span class="note-caption">YOUR SECOND BRAIN, ON A SHELF.</span></div>
+          <a class="add-link" href="https://app.notion.com/p/Second-Brain-38aab6484e248086bbc3d4e665a2d5cc" target="_blank" rel="noopener noreferrer"><span class="notion-icon">N</span><span>Keep saving with your extension<span class="add-subtitle">Your finds land here from Notion</span></span><span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+      <section class="library-controls" aria-label="Library controls">
+        <div class="toolbar">
+          <div class="view-switch" role="group" aria-label="Library view"><button class="active" id="shelf-view" aria-pressed="true"><span aria-hidden="true">▥</span> Shelf</button><button id="topics-view" aria-pressed="false"><span aria-hidden="true">⊞</span> Topics</button></div>
+          <div class="search-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.7" cy="10.7" r="6.7"/><path d="m16 16 4.5 4.5"/></svg><input type="search" id="search" placeholder="Find something good…" aria-label="Search your library"><kbd>/</kbd></div>
+          <div class="tag-select-wrap"><label class="sr-only" for="tag-select">Filter by original tag</label><select id="tag-select"><option value="All">All original tags</option></select></div>
+          <div class="sort-wrap"><label for="sort">Arrange by</label><select id="sort"><option value="topic">Concept</option><option value="recent">Recently saved</option><option value="colour">Colour</option><option value="title">Title, A–Z</option></select></div>
+          <button class="icon-button" id="refresh" aria-label="Refresh from Notion" title="Refresh from Notion">↻</button>
+        </div>
+        <div class="tag-filters" id="filters" aria-label="Filter by tag"></div>
+      </section>
+      <div class="collection-heading"><div><span class="section-marker" aria-hidden="true"></span><h2 id="collection-title">The whole collection</h2><span id="result-count"></span></div><div class="collection-actions"><span class="collection-hint" id="collection-hint">PICK A SPINE. FOLLOW YOUR CURIOSITY.</span><button id="add-book" class="add-book-button">＋ Add book</button></div></div>
+      <p id="library-notice" class="library-notice" role="status" hidden></p>
+      <section id="collection" class="collection" aria-label="Saved articles" aria-live="polite"></section>
+      <p id="sync-message" class="sync-message" role="status"></p>
+    </main>
+    <footer><span>COLLECTED WITH CURIOSITY <span class="footer-star">✳</span></span><span>Made from your <a href="https://app.notion.com/p/38aab6484e2480fb9d96c3c7f555d2f5" target="_blank" rel="noopener noreferrer">my-brain</a> in Notion <span aria-hidden="true">↗</span></span></footer>
+  </div>
+  <dialog id="connection-dialog">
+    <form method="dialog"><button class="dialog-close" aria-label="Close connection details">×</button></form>
+    <div class="dialog-icon">N</div><p class="eyebrow">YOUR LIBRARY, CONNECTED</p><h2>Good finds. Same home.</h2>
+    <p id="connection-detail"></p>
+    <div class="schema-strip"><span>Name</span><span>URL</span><span>Tags</span><span>Note</span><span>Saved</span><span>Concept</span><span>Subconcept</span></div>
+    <p class="dialog-small">Concepts become books. Subconcepts become chapters. The library reads your table; use the updated extension to keep saving.</p>
+    <a class="dialog-link" href="https://app.notion.com/p/38aab6484e2480fb9d96c3c7f555d2f5" target="_blank" rel="noopener noreferrer">Open my-brain in Notion ↗</a>
+  </dialog>
+  <dialog id="add-book-dialog" aria-labelledby="add-book-title">
+    <button type="button" id="close-add-book" class="dialog-close" aria-label="Close add book">×</button>
+    <p class="eyebrow">MAKE ROOM FOR A NEW CURIOSITY</p>
+    <h2 id="add-book-title">A new book.</h2>
+    <p>Create a concept in Notion. It becomes a book here and a choice in your saving extension.</p>
+    <form id="add-book-form">
+      <label for="new-book-name">Book name</label><input id="new-book-name" name="name" maxlength="80" placeholder="e.g. Design & creativity" required autocomplete="off">
+      <label for="new-book-chapter">First chapter <span>(optional)</span></label><input id="new-book-chapter" name="chapter" maxlength="80" placeholder="e.g. Typography" autocomplete="off" aria-describedby="new-chapter-hint">
+      <p id="new-chapter-hint" class="field-hint">Adds a chapter choice to the extension. It appears inside the book when you save its first link.</p>
+      <label for="library-edit-key">Library edit key</label><input id="library-edit-key" type="password" autocomplete="off" required placeholder="Your private edit key" aria-describedby="edit-key-hint">
+      <p id="edit-key-hint" class="field-hint">Use the LIBRARY_EDIT_KEY you set on your server.</p>
+      <p id="add-book-error" class="form-error" role="alert"></p>
+      <button id="create-book" class="create-book-button" type="submit">Create book in Notion ↗</button>
+    </form>
+  </dialog>
+  <dialog id="book-dialog" aria-labelledby="open-book-title">
+    <button id="close-book" class="close-book" aria-label="Close book">×</button>
+    <div class="open-book-spread">
+      <aside class="open-book-cover">
+        <p class="eyebrow">THE SECOND BRAIN COLLECTION</p>
+        <span id="open-book-symbol" class="open-book-symbol" aria-hidden="true"></span>
+        <h2 id="open-book-title"></h2>
+        <p id="open-book-description"></p>
+        <p id="open-book-volume"></p>
+        <nav id="chapter-list" aria-label="Book chapters"></nav>
+        <span class="book-owner">FROM AMITH’S PERSONAL LIBRARY</span>
+      </aside>
+      <div class="open-book-right">
+        <div class="book-search-bar"><label class="sr-only" for="book-search">Search inside this book</label><span aria-hidden="true">⌕</span><input id="book-search" type="search" placeholder="Find a chapter or saved idea…" autocomplete="off"><button id="clear-book-search" type="button" aria-label="Clear book search" hidden>×</button></div>
+        <div id="book-page" tabindex="-1" aria-live="polite"></div>
+        <div class="page-footer"><span>SECOND BRAIN / PERSONAL LIBRARY</span><span id="page-number">00</span></div>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>

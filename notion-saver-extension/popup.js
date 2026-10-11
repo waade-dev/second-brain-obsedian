@@ -24,7 +24,12 @@ const els = {
   chips: document.getElementById("chips"),
   tagsInput: document.getElementById("tags-input"),
   saveBtn: document.getElementById("save-btn"),
-  status: document.getElementById("status")
+  status: document.getElementById("status"),
+  conceptFields: document.getElementById("concept-fields"),
+  concept: document.getElementById("concept"),
+  subconcept: document.getElementById("subconcept"),
+  chapterOptions: document.getElementById("chapter-options"),
+  schemaInfo: document.getElementById("schema-info")
 };
 
 let settings = { ...DEFAULTS };
@@ -32,6 +37,10 @@ let currentTab = null;
 let tags = [];
 let databases = [];
 let selectedDb = "";
+let schemaContext = null;
+let schemaGeneration = 0;
+let chapterGeneration = 0;
+let saved = false;
 
 const FALLBACK_FAVICON =
   "data:image/svg+xml;utf8," +
@@ -57,7 +66,7 @@ function setStatus(msg, kind) {
 }
 
 function normalizeTag(raw) {
-  return raw.trim().replace(/^#/, "").replace(/\s+/g, "-").toLowerCase();
+  return String(raw).trim();
 }
 
 function renderChips() {
@@ -65,8 +74,13 @@ function renderChips() {
   tags.forEach((tag, i) => {
     const chip = document.createElement("span");
     chip.className = "chip";
-    chip.innerHTML = `#${tag} <button type="button" aria-label="Remove ${tag}">&times;</button>`;
-    chip.querySelector("button").addEventListener("click", (e) => {
+    chip.append(document.createTextNode(tag + " "));
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.setAttribute("aria-label", `Remove ${tag}`);
+    remove.textContent = "×";
+    chip.append(remove);
+    remove.addEventListener("click", (e) => {
       e.stopPropagation();
       tags.splice(i, 1);
       renderChips();
@@ -84,7 +98,7 @@ function addTagFromInput() {
 
 function allTags() {
   const defaults = settings.defaultTags
-    .split(/[,\s]+/)
+    .split(",")
     .map(normalizeTag)
     .filter(Boolean);
   return [...new Set([...tags, ...defaults])];
@@ -99,24 +113,37 @@ function renderDbBar() {
     pill.textContent = db.name || "Untitled";
     pill.setAttribute("role", "tab");
     pill.addEventListener("click", () => {
+      if (els.saveBtn.classList.contains("is-saving") || saved) return;
       selectedDb = db.databaseId;
       chrome.storage.sync.set({ selectedDb });
       renderDbBar();
+      loadSchema();
     });
     els.dbBar.appendChild(pill);
   });
 }
 
 async function save() {
-  if (els.saveBtn.classList.contains("is-saving")) return;
+  if (els.saveBtn.classList.contains("is-saving") || saved || els.saveBtn.disabled) return;
   addTagFromInput(); // commit any half-typed tag
 
   if (!settings.token || !databases.length) {
     setStatus("Not connected to Notion. Open Settings first.", "err");
     return;
   }
+  if (!currentTab?.url || !/^https?:\/\//i.test(currentTab.url)) {
+    setStatus("Open an http or https page to save it.", "err");
+    return;
+  }
+  if (!schemaContext) return setStatus("The database is still loading. Try again shortly.", "err");
+  if (!els.conceptFields.classList.contains("hidden") && (!els.concept.value || !els.subconcept.value.trim())) {
+    setStatus("Choose a concept book and a chapter before saving.", "err");
+    (!els.concept.value ? els.concept : els.subconcept).focus();
+    return;
+  }
 
   els.saveBtn.classList.add("is-saving");
+  els.saveBtn.disabled = true;
   setStatus("");
 
   try {
@@ -126,10 +153,15 @@ async function save() {
       title: currentTab.title || currentTab.url,
       url: currentTab.url,
       note: els.note.value.trim(),
-      tags: allTags()
+      tags: allTags(),
+      context: schemaContext,
+      concept: els.conceptFields.classList.contains("hidden") ? "" : els.concept.value,
+      subconcept: els.conceptFields.classList.contains("hidden") ? "" : els.subconcept.value.trim()
     });
 
     chrome.storage.sync.set({ selectedDb }); // remember choice
+    chrome.storage.local.set({ lastConcept: els.concept.value });
+    saved = true;
     els.saveBtn.classList.remove("is-saving");
     els.saveBtn.classList.add("is-saved");
 
@@ -143,6 +175,7 @@ async function save() {
     }
   } catch (e) {
     els.saveBtn.classList.remove("is-saving");
+    els.saveBtn.disabled = false;
     setStatus(e.message || "Could not save to Notion.", "err");
   }
 }
@@ -152,7 +185,7 @@ function setupTagInput() {
   els.tagsInput.addEventListener("focus", () => els.tagsBox.classList.add("focused"));
   els.tagsInput.addEventListener("blur", () => els.tagsBox.classList.remove("focused"));
   els.tagsInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === "," || e.key === " ") {
+    if (e.key === "Enter" || e.key === ",") {
       if (els.tagsInput.value.trim()) {
         e.preventDefault();
         addTagFromInput();
@@ -162,6 +195,58 @@ function setupTagInput() {
       renderChips();
     }
   });
+}
+
+async function loadChapters() {
+  const generation = ++chapterGeneration;
+  const concept = els.concept.value;
+  els.chapterOptions.replaceChildren();
+  if (!concept || !schemaContext) return;
+  try {
+    const names = await NOTION.getChapters({ token: settings.token, context: schemaContext, concept });
+    if (generation !== chapterGeneration || concept !== els.concept.value) return;
+    els.chapterOptions.replaceChildren(...names.map(name => new Option(name, name)));
+  } catch {
+    // New chapter names still work when suggestions are temporarily unavailable.
+  }
+}
+
+async function loadSchema() {
+  const generation = ++schemaGeneration;
+  ++chapterGeneration;
+  schemaContext = null;
+  els.saveBtn.disabled = true;
+  els.conceptFields.classList.add("hidden");
+  els.schemaInfo.textContent = "Reading your Notion columns…";
+  els.concept.replaceChildren(new Option("Choose a book…", ""));
+  els.subconcept.value = "";
+  els.chapterOptions.replaceChildren();
+  const db = databases.find(db => db.databaseId === selectedDb);
+  try {
+    const context = await NOTION.retrieveDatabase({ token: settings.token, databaseId: selectedDb, dataSourceId: db?.dataSourceId });
+    if (generation !== schemaGeneration) return;
+    schemaContext = context;
+    const hasConcepts = context.properties.Concept?.type === "select" && context.properties.Subconcept?.type === "select";
+    if (hasConcepts) {
+      const names = (context.properties.Concept.select.options || []).map(option => option.name);
+      els.concept.append(...names.map(name => new Option(name, name)));
+      els.conceptFields.classList.remove("hidden");
+      els.schemaInfo.textContent = "Books and chapter suggestions come from this Notion table.";
+      chrome.storage.local.get({ lastConcept: "" }, ({ lastConcept }) => {
+        if (generation !== schemaGeneration) return;
+        if (names.includes(lastConcept)) els.concept.value = lastConcept;
+        loadChapters();
+      });
+    } else {
+      els.schemaInfo.textContent = "This database saves links without concept fields.";
+    }
+    els.saveBtn.disabled = !/^https?:\/\//i.test(currentTab?.url || "");
+    if (els.saveBtn.disabled) setStatus("Open an http or https page to save it.", "err");
+  } catch (error) {
+    if (generation !== schemaGeneration) return;
+    els.schemaInfo.textContent = "Could not read this database. Check its connection in Settings.";
+    setStatus(error.message, "err");
+  }
 }
 
 async function init() {
@@ -196,10 +281,12 @@ async function init() {
     els.form.classList.add("hidden");
   } else {
     renderDbBar();
+    loadSchema();
   }
 
   setupTagInput();
   els.saveBtn.addEventListener("click", save);
+  els.concept.addEventListener("change", () => { els.subconcept.value = ""; loadChapters(); });
   const openOpts = (e) => {
     e.preventDefault();
     chrome.runtime.openOptionsPage();

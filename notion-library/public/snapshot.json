@@ -1,0 +1,165 @@
+{
+  "source": "snapshot",
+  "capturedAt": "2026-10-11T21:07:31.238Z",
+  "rows": [
+    {
+      "id": "3f6ab648-4e24-811d-8e79-f110e1b766ba",
+      "Name": "(1) smerkzz on X: \"SpaceXAI engineer, Lauren Tan: \"GrokBot is the most powerful agentic tool we have ever shipped, but only 0.1% of users use it correctly at SpaceXAI, I'm running a team of 15+ GrokBot agents. I have a Chief of Staff agent, 3 managers and 11 workers - that's the new engineering https://t.co/vSK74vFzFh\" / X",
+      "URL": "https://x.com/0xsmerkzz/status/2109052759651635222",
+      "Tags": [
+        "keeping-up"
+      ],
+      "Note": "poteto's grok bot",
+      "Saved": "2026-10-12T02:24:00+05:30",
+      "Concept": "AI & Machine Learning",
+      "Subconcept": "grok_bot_2026-10"
+    },
+    {
+      "id": "3caab648-4e24-81b6-8377-f24fde028a9d",
+      "Name": "Weights & Biases: The AI developer platform",
+      "URL": "https://wandb.ai/site",
+      "Tags": [
+        "ai-training",
+        "big",
+        "brains"
+      ],
+      "Note": "tain-ai-101",
+      "Saved": "2026-08-29T01:49:00+05:30",
+      "Concept": "AI & Machine Learning",
+      "Subconcept": "Training"
+    },
+    {
+      "id": "3caab648-4e24-81c8-bf9e-d2de8873aa9f",
+      "Name": "GitHub - marin-community/marin: Open-source framework for the research and development of foundation models. · GitHub",
+      "URL": "https://github.com/marin-community/marin",
+      "Tags": [
+        "train-ai",
+        "big",
+        "brains"
+      ],
+      "Note": "marin train ai",
+      "Saved": "2026-08-29T01:49:00+05:30",
+      "Concept": "AI & Machine Learning",
+      "Subconcept": "Foundation Models"
+    },
+    {
+      "id": "3acab648-4e24-81fa-a296-ef6283fed62d",
+      "Name": "Namyalg (Namya LG) · GitHub",
+      "URL": "https://github.com/Namyalg",
+      "Tags": [
+        "big",
+        "brains"
+      ],
+      "Note": "be frightned",
+      "Saved": "2026-07-29T10:01:00+05:30",
+      "Concept": "People & Learning",
+      "Subconcept": "Profiles"
+    },
+    {
+      "id": "3acab648-4e24-81b9-822f-f4d921fc75bc",
+      "Name": "Da0t (Dat Nguyen) · GitHub",
+      "URL": "https://github.com/Da0t",
+      "Tags": [
+        "big",
+        "brains"
+      ],
+      "Note": "leet code",
+      "Saved": "2026-07-29T07:57:00+05:30",
+      "Concept": "People & Learning",
+      "Subconcept": "Profiles"
+    },
+    {
+      "id": "39dab648-4e24-816b-a2ed-c72696fe1fd4",
+      "Name": "ept/hermitage: What are the differences between the transaction isolation levels in databases? This is a suite of test cases which differentiate isolation levels.",
+      "URL": "https://github.com/ept/hermitage",
+      "Tags": [
+        "bknd-research"
+      ],
+      "Note": "backend research",
+      "Saved": "2026-07-15T04:05:00+05:30",
+      "Concept": "Systems & Backend",
+      "Subconcept": "Databases"
+    },
+    {
+      "id": "394ab648-4e24-81e3-846e-fab6f808a486",
+      "Name": "Papers with Code",
+      "URL": "https://paperswithcode.co/",
+      "Tags": [
+        "papers"
+      ],
+      "Note": "reasearch papers",
+      "Saved": "2026-07-06T02:36:00+05:30",
+      "Concept": "AI & Machine Learning",
+      "Subconcept": "Research"
+    },
+    {
+      "id": "394ab648-4e24-810d-a6b1-ec1d62672e41",
+      "Name": "AI Roadmap for 2026 - Final Draft - roadmap.sh",
+      "URL": "https://roadmap.sh/r/ai-roadmap-for-2026---final-draft",
+      "Tags": [
+        "campusx-sylabus",
+        "big",
+        "brains"
+      ],
+      "Note": "lld deep dive from campusX",
+      "Saved": "2026-07-06T01:47:00+05:30",
+      "Concept": "AI & Machine Learning",
+      "Subconcept": "Roadmaps"
+    },
+    {
+      "id": "394ab648-4e24-8198-9d4c-d2f76e22b9d2",
+      "Name": "Elevator System Low-Level Design (LLD) - GeeksforGeeks",
+      "URL": "https://www.geeksforgeeks.org/system-design/elevator-system-low-level-design-lld/",
+      "Tags": [
+        "go-lld"
+      ],
+      "Note": "LLD learning",
+      "Saved": "2026-07-06T01:45:00+05:30",
+      "Concept": "Systems & Backend",
+      "Subconcept": "Low-Level Design"
+    },
+    {
+      "id": "394ab648-4e24-81ba-8762-f5313dc65b6d",
+      "Name": "hkirat/what-im-learning",
+      "URL": "https://github.com/hkirat/what-im-learning",
+      "Tags": [
+        "big-brains"
+      ],
+      "Note": "harkirats learning",
+      "Saved": "2026-07-06T01:44:00+05:30",
+      "Concept": "People & Learning",
+      "Subconcept": "Learning Logs"
+    },
+    {
+      "id": "38aab648-4e24-81a7-aba8-f9508e45994c",
+      "Name": "Ayush on X: \"Which is the best DP playlist ",
+      "URL": "https://x.com/ayushkeshri4k/status/2067970658236035088",
+      "Tags": [
+        "letsgo-dp",
+        "big-brains"
+      ],
+      "Note": "learn dp",
+      "Saved": "2026-06-26T04:14:00+05:30",
+      "Concept": "Algorithms",
+      "Subconcept": "Dynamic Programming"
+    },
+    {
+      "id": "38aab648-4e24-81c2-8e15-c5b4e525c35d",
+      "Name": "Hello Interview - YouTube",
+      "URL": "https://www.youtube.com/@hello_interview",
+      "Tags": [
+        "#kill-lld"
+      ],
+      "Note": "System-design",
+      "Saved": "2026-06-26T04:03:00+05:30",
+      "Concept": "Systems & Backend",
+      "Subconcept": "System Design"
+    }
+  ],
+  "concepts": [
+    "AI & Machine Learning",
+    "People & Learning",
+    "Systems & Backend",
+    "Algorithms"
+  ]
+}

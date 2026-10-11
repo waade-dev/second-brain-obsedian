@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <title>Save to Notion — Settings</title>
+  <script src="theme.js"></script>
   <link rel="stylesheet" href="options.css" />
+  <link rel="stylesheet" href="concepts.css" />
 </head>
 <body>
   <div class="card">
@@ -15,6 +17,7 @@
         <h1>Save to Notion</h1>
         <p class="sub">Saves pages straight into a Notion database — works from anywhere, no app open.</p>
       </div>
+      <div class="header-actions"><button class="theme-toggle" id="theme-toggle" aria-label="Switch to dark mode" type="button">☾</button></div>
     </header>
 
     <details class="help">
@@ -27,7 +30,8 @@
         <li>Copy the database <strong>URL</strong> (or its 32-char ID) and paste it below.</li>
       </ol>
       <p class="note">Your database needs these columns: <code>Name</code> (Title), <code>URL</code>,
-        <code>Tags</code> (Multi-select), <code>Note</code> (Text), <code>Saved</code> (Created time).</p>
+        <code>Tags</code> (Multi-select), <code>Note</code> (Text), <code>Saved</code> (Date),
+        <code>Concept</code> and <code>Subconcept</code> (Select). Concept inputs follow the table’s options.</p>
     </details>
 
     <!-- Token -->

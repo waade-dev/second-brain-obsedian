@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Save to Notion",
-  "version": "1.0.0",
-  "description": "Save the current page (URL, title, your note, tags) straight into a Notion database — works from anywhere, no app needed.",
+  "version": "1.1.0",
+  "description": "Save pages into your Notion concept books and chapters, with notes, tags, and a stable saved date.",
   "permissions": ["activeTab", "storage", "tabs"],
   "host_permissions": ["https://api.notion.com/*"],
   "icons": {

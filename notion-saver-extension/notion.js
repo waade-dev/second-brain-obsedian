@@ -1,98 +1,24 @@
-// Notion API client. The extension talks to api.notion.com directly — MV3
-// host_permissions grant the cross-origin access that normal web pages can't.
-// Used by popup.js and options.js.
-
+// Shared Notion client for the popup and settings. Credentials remain inside
+// extension storage and are sent only to api.notion.com.
 const NOTION = (() => {
-  const API = "https://api.notion.com/v1";
-  const VERSION = "2022-06-28";
-
-  function headers(token) {
-    return {
-      Authorization: `Bearer ${token}`,
-      "Notion-Version": VERSION,
-      "Content-Type": "application/json"
-    };
+  const API='https://api.notion.com/v1', VERSION='2026-03-11';
+  const UUID=/^[0-9a-f]{32}$/i;
+  function parseDatabaseId(input){const raw=String(input||'').trim();let path=raw;if(/^https?:/i.test(raw)){try{path=new URL(raw).pathname;}catch{throw new Error('Enter a valid Notion database URL.');}}const matches=path.replace(/-/g,'').match(/[0-9a-f]{32}/gi);const id=matches?.at(-1)||raw.replace(/-/g,'');if(!UUID.test(id))throw new Error('Enter the database’s URL or a valid 32-character ID.');return id;}
+  async function request(token,path,body){const res=await fetch(`${API}${path}`,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${token}`,'Notion-Version':VERSION,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(20000)});if(!res.ok){const data=await res.json().catch(()=>({}));if(res.status===404)throw new Error('Database not found. Share it with this Notion connection and check its ID.');if(res.status===401)throw new Error('The Notion token is invalid. Update it in Settings.');throw new Error(data.message||`Notion error ${res.status}`);}return res.json();}
+  async function retrieveDatabase({token,databaseId,dataSourceId}){const id=parseDatabaseId(databaseId);const db=await request(token,`/databases/${id}`);const sourceId=dataSourceId|| (db.data_sources?.length===1?db.data_sources[0].id:null);if(!sourceId)throw new Error('This database has multiple data sources. Add the intended data source ID in Settings.');const source=await request(token,`/data_sources/${parseDatabaseId(sourceId)}`);return {...db,properties:source.properties||{},dataSourceId:source.id,databaseId:id};}
+  function property(schema,type,names,fallback=false){for(const name of names){const entry=Object.entries(schema).find(([key,value])=>key.toLowerCase()===name.toLowerCase()&&value.type===type);if(entry)return entry[0];}if(fallback)return Object.entries(schema).find(([,value])=>value.type===type)?.[0]||null;return null;}
+  function textObjects(value){const chars=Array.from(String(value));const chunks=[];for(let i=0;i<chars.length;i+=1000)chunks.push({type:'text',text:{content:chars.slice(i,i+1000).join('')}});if(chunks.length>100)throw new Error('This note is too long for Notion. Shorten it before saving.');return chunks;}
+  async function getChapters({token,context,concept}){if(!context.properties.Concept||!context.properties.Subconcept||!concept)return [];let cursor;const chapters=new Set();let pages=0;do{if(++pages>10)break;const result=await request(token,`/data_sources/${context.dataSourceId}/query`,{page_size:100,filter:{property:'Concept',select:{equals:concept}},...(cursor?{start_cursor:cursor}:{})});for(const row of result.results||[]){const name=row.properties?.Subconcept?.select?.name;if(name)chapters.add(name);}cursor=result.has_more?result.next_cursor:null;}while(cursor);return [...chapters].sort();}
+  async function createPage({token,databaseId,dataSourceId,title,url,note,tags,concept,subconcept,context}){
+    let parsedURL;try{parsedURL=new URL(url);if(!['https:','http:'].includes(parsedURL.protocol))throw new Error();}catch{throw new Error('Only normal http or https pages can be saved.');}
+    const db=context?.databaseId===parseDatabaseId(databaseId)?context:await retrieveDatabase({token,databaseId,dataSourceId});const schema=db.properties;const properties={},skipped=[];
+    const name=property(schema,'title',['Name','Title'],true);if(!name)throw new Error('This data source has no title column.');properties[name]={title:textObjects(title||url||'Untitled')};
+    const urlName=property(schema,'url',['URL','Link'],true);if(!urlName)throw new Error('This data source needs a URL column to preserve the saved link.');properties[urlName]={url:parsedURL.href};
+    if(tags?.length){const name=property(schema,'multi_select',['Tags','Labels']);if(name)properties[name]={multi_select:[...new Set(tags.map(tag=>String(tag).trim()).filter(Boolean))].map(name=>({name}))};else skipped.push('Tags');}
+    if(note){const name=property(schema,'rich_text',['Note','Notes','Comment','Description']);if(name)properties[name]={rich_text:textObjects(note)};else skipped.push('Note');}
+    for(const [name,value]of [['Concept',concept],['Subconcept',subconcept]]){if(value){if(schema[name]?.type!=='select')throw new Error(`${name} needs a Select column in this database.`);properties[name]={select:{name:String(value).trim()}};}}
+    if(schema.Saved?.type==='date')properties.Saved={date:{start:new Date().toISOString()}};
+    const page=await request(token,'/pages',{parent:{type:'data_source_id',data_source_id:db.dataSourceId},properties});return {page,skipped};
   }
-
-  async function asError(res) {
-    const data = await res.json().catch(() => ({}));
-    return new Error(data.message || `Notion error ${res.status}`);
-  }
-
-  // Accepts a raw 32-char id, a hyphenated UUID, or a full database URL.
-  function parseDatabaseId(input) {
-    const before = String(input).split("?")[0].replace(/-/g, "");
-    const matches = before.match(/[0-9a-fA-F]{32}/g);
-    return matches ? matches[matches.length - 1] : String(input).trim();
-  }
-
-  // Find a property in the DB schema by type, preferring a name match.
-  // schema = db.properties, an object keyed by property name.
-  function findProp(schema, type, namePatterns) {
-    const entries = Object.entries(schema);
-    for (const re of namePatterns) {
-      const hit = entries.find(([name, def]) => def.type === type && re.test(name));
-      if (hit) return hit[0];
-    }
-    const any = entries.find(([, def]) => def.type === type);
-    return any ? any[0] : null;
-  }
-
-  // Create one page (row). The database schema is read first so we map to
-  // whatever columns actually exist — missing ones (e.g. Tags/Note) are simply
-  // skipped instead of erroring. Created-time columns (e.g. "Saved") are filled
-  // by Notion automatically.
-  async function createPage({ token, databaseId, title, url, note, tags }) {
-    const db = await retrieveDatabase({ token, databaseId });
-    const schema = db.properties || {};
-
-    const properties = {};
-    const skipped = [];
-
-    const titleName = findProp(schema, "title", [/name/i, /title/i]);
-    if (titleName) {
-      properties[titleName] = { title: [{ text: { content: title || url || "Untitled" } }] };
-    }
-
-    if (url) {
-      const urlName = findProp(schema, "url", [/url/i, /link/i]);
-      if (urlName) properties[urlName] = { url };
-      else skipped.push("URL");
-    }
-
-    if (tags && tags.length) {
-      const tagsName = findProp(schema, "multi_select", [/tag/i, /label/i]);
-      if (tagsName) properties[tagsName] = { multi_select: tags.map((name) => ({ name })) };
-      else skipped.push("Tags");
-    }
-
-    if (note) {
-      const noteName = findProp(schema, "rich_text", [/note/i, /comment/i, /desc/i]);
-      if (noteName) properties[noteName] = { rich_text: [{ text: { content: note } }] };
-      else skipped.push("Note");
-    }
-
-    const res = await fetch(`${API}/pages`, {
-      method: "POST",
-      headers: headers(token),
-      body: JSON.stringify({
-        parent: { database_id: databaseId },
-        properties
-      })
-    });
-    if (!res.ok) throw await asError(res);
-    const page = await res.json();
-    return { page, skipped }; // skipped = fields with no matching column
-  }
-
-  // Verify the token can see the database. Returns the database object.
-  async function retrieveDatabase({ token, databaseId }) {
-    const res = await fetch(`${API}/databases/${databaseId}`, {
-      headers: headers(token)
-    });
-    if (!res.ok) throw await asError(res);
-    return res.json();
-  }
-
-  return { parseDatabaseId, createPage, retrieveDatabase };
+  return {parseDatabaseId,retrieveDatabase,getChapters,createPage};
 })();

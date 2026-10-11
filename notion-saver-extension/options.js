@@ -24,7 +24,7 @@ function setStatus(msg, kind, sticky) {
 }
 
 // Build one editable database row.
-function addDbRow(name = "", url = "") {
+function addDbRow(name = "", url = "", sourceId = "") {
   const item = document.createElement("div");
   item.className = "db-item";
 
@@ -39,13 +39,21 @@ function addDbRow(name = "", url = "") {
   urlInput.className = "db-url";
   urlInput.placeholder = "Database URL or 32-char ID";
   urlInput.value = url;
+  const sourceInput = document.createElement("input");
+  sourceInput.type = "text";
+  sourceInput.className = "db-source";
+  sourceInput.placeholder = "Data source ID (optional; only for multiple sources)";
+  sourceInput.setAttribute("aria-label", "Data source ID (optional)");
+  sourceInput.value = sourceId;
+  nameInput.setAttribute("aria-label", "Database name");
+  urlInput.setAttribute("aria-label", "Database URL or ID");
 
   const testBtn = document.createElement("button");
   testBtn.type = "button";
   testBtn.className = "icon-btn-sm";
   testBtn.title = "Test this database";
   testBtn.textContent = "✓";
-  testBtn.addEventListener("click", () => testRow(nameInput, urlInput, testBtn));
+  testBtn.addEventListener("click", () => testRow(nameInput, urlInput, testBtn, sourceInput));
 
   const removeBtn = document.createElement("button");
   removeBtn.type = "button";
@@ -54,7 +62,7 @@ function addDbRow(name = "", url = "") {
   removeBtn.textContent = "×";
   removeBtn.addEventListener("click", () => item.remove());
 
-  item.append(nameInput, urlInput, testBtn, removeBtn);
+  item.append(nameInput, urlInput, testBtn, removeBtn, sourceInput);
   els.dbList.appendChild(item);
   return item;
 }
@@ -65,7 +73,8 @@ function collectDatabases() {
     const name = item.querySelector(".db-name").value.trim();
     const raw = item.querySelector(".db-url").value.trim();
     if (!raw) return;
-    out.push({ name: name || "Untitled", databaseId: NOTION.parseDatabaseId(raw) });
+    const source = item.querySelector(".db-source").value.trim();
+    out.push({ name: name || "Untitled", databaseId: NOTION.parseDatabaseId(raw), ...(source ? { dataSourceId: NOTION.parseDatabaseId(source) } : {}) });
   });
   return out;
 }
@@ -79,12 +88,12 @@ function load() {
     if (!dbs.length && s.databaseId) dbs = [{ name: "My database", databaseId: s.databaseId }];
 
     els.dbList.innerHTML = "";
-    if (dbs.length) dbs.forEach((d) => addDbRow(d.name, d.databaseId));
+    if (dbs.length) dbs.forEach((d) => addDbRow(d.name, d.databaseId, d.dataSourceId));
     else addDbRow(); // start with one empty row
   });
 }
 
-async function testRow(nameInput, urlInput, btn) {
+async function testRow(nameInput, urlInput, btn, sourceInput) {
   const token = els.token.value.trim();
   const raw = urlInput.value.trim();
   if (!token) return setStatus("Enter the integration token first.", "err");
@@ -95,12 +104,14 @@ async function testRow(nameInput, urlInput, btn) {
   try {
     const db = await NOTION.retrieveDatabase({
       token,
-      databaseId: NOTION.parseDatabaseId(raw)
+      databaseId: NOTION.parseDatabaseId(raw),
+      dataSourceId: sourceInput.value.trim() ? NOTION.parseDatabaseId(sourceInput.value) : undefined
     });
     const title = (db.title && db.title[0] && db.title[0].plain_text) || "database";
     if (!nameInput.value.trim()) nameInput.value = title; // auto-fill name
     btn.classList.add("ok");
-    setStatus(`Connected to “${title}” ✓`, "ok");
+    const concepts = db.properties.Concept?.type === "select" && db.properties.Subconcept?.type === "select";
+    setStatus(`Connected to “${title}” ✓${concepts ? " — concepts and chapters ready" : ""}`, "ok");
   } catch (e) {
     btn.classList.add("err");
     let msg = e.message || "Connection failed.";
@@ -113,12 +124,13 @@ async function testRow(nameInput, urlInput, btn) {
 
 function save() {
   const token = els.token.value.trim();
-  const databases = collectDatabases();
+  let databases;
+  try { databases = collectDatabases(); } catch (error) { return setStatus(error.message, "err"); }
   if (!token) return setStatus("Enter the integration token.", "err");
   if (!databases.length) return setStatus("Add at least one database.", "err");
 
   // Reflect normalized IDs back into the rows.
-  const items = els.dbList.querySelectorAll(".db-item");
+  const items = [...els.dbList.querySelectorAll(".db-item")].filter(item => item.querySelector(".db-url").value.trim());
   databases.forEach((d, i) => {
     if (items[i]) items[i].querySelector(".db-url").value = d.databaseId;
   });
