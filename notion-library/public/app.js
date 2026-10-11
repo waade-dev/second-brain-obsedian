@@ -20,13 +20,24 @@ function renderFilters(){
   $('filters').replaceChildren();
   for(const [name,count] of [['All',state.rows.length],...allBooks().map(book=>[book.name,book.rows.length])]){const button=el('button',`tag-pill${state.concept===name?' active':''}`);button.setAttribute('aria-pressed',String(state.concept===name));if(name!=='All'){const meta=CONCEPTS.find(c=>c.name===name);button.append(el('span','tag-symbol',meta?.symbol||'❋'));}button.append(el('span','',name==='All'?'All books':name),el('span','tag-count',count));button.addEventListener('click',()=>{state.concept=name;render();});$('filters').append(button);}
 }
+function makeSpine(book,index){
+  const button=el('button',`book concept-book shelf-spine ${['banded','label','italic','banded'][index%4]}`);addStyles(button,book);
+  const description=`Open ${book.name}, ${plural(book.chapters.length,'chapter')}, ${plural(book.rows.length,'article')}`;
+  button.setAttribute('aria-label',description);button.title=description;
+  button.style.setProperty('--book-colour',book.colour);
+  button.style.setProperty('--book-width',`${[76,90,70,82][index%4]}px`);
+  button.style.setProperty('--book-height',`${[286,312,272,300][index%4]}px`);
+  const symbol=el('span','book-symbol',book.symbol);symbol.setAttribute('aria-hidden','true');
+  button.append(symbol,el('span','book-title',book.name),el('span','imprint',`${book.rows.length} ${book.rows.length===1?'find':'finds'}`));
+  button.addEventListener('click',()=>openBook(book.name,button));return button;
+}
 function renderBooks(){
   const books=visibleBooks(),count=books.reduce((n,book)=>n+book.rows.length,0);
   $('collection').replaceChildren();$('result-count').textContent=`${plural(books.length,'book')} · ${plural(count,'article')}`;
   $('collection-title').textContent=state.query?'Your discoveries':state.concept==='All'?'A shelf for every curiosity':state.concept;
-  $('collection-hint').textContent='OPEN A BOOK. FOLLOW A THREAD.';
+  $('collection-hint').textContent='PICK A SPINE. OPEN A BOOK.';
   if(!books.length){const empty=el('div','empty-state');empty.append(el('span','empty-icon','⌕'),el('h3','','A little room for curiosity.'),el('p','',state.rows.length?'No matches. Try another concept, tag, or search.':'Save your first link with the extension to start a chapter.'));if(state.rows.length){const clear=el('button','','Show all books');clear.addEventListener('click',()=>{state.query='';state.concept='All';state.tag='All';$('search').value='';$('tag-select').value='All';render();});empty.append(clear);}$('collection').append(empty);return;}
-  if(state.view==='shelf'){const shelf=el('div','concept-shelf');const covers=el('div','concept-covers');covers.append(...books.map(makeCover));shelf.append(covers,el('div','shelf-wood'));const caption=el('div','shelf-caption');caption.append(el('span','shelf-name','✦  Collected, connected, and ready to explore.'),el('span','shelf-number','VOLUME ONE · ALWAYS GROWING'));shelf.append(caption);$('collection').append(shelf);}
+  if(state.view==='shelf'){const shelf=el('div','concept-shelf');const track=el('div','book-track concept-spine-track');track.setAttribute('aria-label','Concept books on the shelf');track.append(...books.map(makeSpine));const bookend=el('span','bookend');bookend.setAttribute('aria-hidden','true');track.append(bookend);shelf.append(track,el('div','shelf-wood'));const caption=el('div','shelf-caption');caption.append(el('span','shelf-name','✦  Pick a spine. There’s something good inside.'),el('span','shelf-number','VOLUME ONE · ALWAYS GROWING'));shelf.append(caption);$('collection').append(shelf);}
   else {const grid=el('div','concept-index');for(const [i,book]of books.entries()){const card=el('article','index-card');addStyles(card,book);const top=el('div','index-top');top.append(el('span','index-symbol',book.symbol),el('span','index-volume',`VOL. ${String(i+1).padStart(2,'0')}`));card.append(top,el('h3','',book.name),el('p','',book.description));const chapters=el('div','index-chapters');if(!book.chapters.length){const open=el('button','index-chapter','Open this book ↗');open.addEventListener('click',()=>openBook(book.name,open));chapters.append(open);}for(const [j,chapter]of book.chapters.entries()){const button=el('button','index-chapter');button.append(el('span','',`${String(j+1).padStart(2,'0')}  ${chapter}`),el('span','',String(book.rows.filter(row=>row.Subconcept===chapter).length)));button.addEventListener('click',()=>openBook(book.name,button,chapter));chapters.append(button);}card.append(chapters);grid.append(card);}$('collection').append(grid);}
 }
 function render(){

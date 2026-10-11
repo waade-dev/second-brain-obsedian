@@ -48,3 +48,18 @@
 @media(max-width:850px){.book-search-bar{margin:42px 26px 0}.collection-actions{gap:12px}}
 @media(max-width:700px){.collection-heading>div:first-child{flex-wrap:wrap;row-gap:7px}.collection-actions{margin-left:auto}.add-book-button{padding:9px 12px;font-size:10px}.book-search-bar{margin:15px 22px 0;height:38px}.book-search-bar input{font-size:11px}.open-book-right #book-page{padding-top:24px}#add-book-dialog{padding:29px 24px}#add-book-form label{margin-top:16px}}
 @media(max-width:350px){.book-search-bar{margin-left:18px;margin-right:18px}.collection-heading{gap:12px}.collection-heading>div:first-child{flex:1}.collection-heading #result-count{flex-basis:100%;margin-left:14px}}
+
+/* The shelf shows narrow spines; the full cover appears when a book opens. */
+.collection{min-height:365px}
+.concept-spine-track{display:flex;align-items:flex-end;gap:7px;min-height:334px;padding:20px 24px 0;perspective:none;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin;scrollbar-color:var(--line) transparent;scroll-padding:24px;overscroll-behavior-x:contain}
+.shelf-spine{display:block;flex:0 0 var(--book-width);width:var(--book-width);height:var(--book-height);min-width:0;padding:0;color:#f6f1e8;border:1px solid #00000024;border-radius:3px 4px 0 0;background:linear-gradient(90deg,#0003 0%,#fff2 6%,transparent 12%,#fff1 79%,#0001 94%,#0003 100%),var(--book-colour);box-shadow:2px 0 3px var(--shadow-ink);transform-style:flat;transform-origin:center bottom;outline-offset:-3px;transition:transform .23s,box-shadow .23s;overflow:hidden}
+.shelf-spine:hover,.shelf-spine:focus-visible{transform:translateY(-12px) rotate(-2deg);box-shadow:5px 8px 10px var(--shadow-ink);z-index:2}
+.shelf-spine .book-title{font-size:18px;font-weight:400;letter-spacing:.3px;max-height:calc(100% - 101px)}
+.shelf-spine.label .book-title{font-size:17px;padding:12px 8px;max-height:calc(100% - 81px)}
+.shelf-spine.italic .book-title{font-size:19px}
+.shelf-spine .imprint{font-size:8px;letter-spacing:1.1px;bottom:15px}
+.shelf-spine .book-symbol{font-size:19px}
+.concept-spine-track .bookend{margin-right:26px}
+.shelf-spine.book-in-flight{opacity:0;transition:none}
+@media(max-width:700px){.collection{min-height:315px}.concept-spine-track{min-height:282px;padding:20px 10px 0;gap:5px;scroll-padding:10px}.shelf-spine{height:calc(var(--book-height) * .82);width:calc(var(--book-width) * .86);flex-basis:calc(var(--book-width) * .86)}.shelf-spine .book-title{font-size:16px}.shelf-spine.label .book-title{font-size:15px;padding:10px 7px}.shelf-spine.italic .book-title{font-size:17px}.shelf-spine .imprint{font-size:7px}.concept-spine-track .bookend{margin-left:6px}}
+@media(prefers-reduced-motion:reduce){.shelf-spine.book-in-flight{opacity:1}}

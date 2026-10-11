@@ -2,7 +2,7 @@
 export function animateBookOpening(dialog, trigger, fallbackCover) {
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return () => {};
   const source = trigger?.matches('.concept-book') ? trigger : fallbackCover;
-  const cover = source?.querySelector('.book-cover');
+  const cover = source?.querySelector('.book-cover') || fallbackCover?.querySelector('.book-cover');
   const spread = dialog.querySelector('.open-book-spread');
   if (!cover || !spread) return () => {};
 
