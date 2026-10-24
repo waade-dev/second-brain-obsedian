@@ -1,5 +1,24 @@
 # Amith’s library
 
+## Task Kanban
+
+Open **Kanban** in the header, or `/tasks.html`. The board has To do, In progress and Done columns, task creation and editing, drag-and-drop, a keyboard and touch friendly Move menu, search, priorities, due dates, notes and links. It follows the library’s light/dark theme and stacks columns on small screens.
+
+Create a private **Second Brain Tasks** database with **All tasks** and **Kanban** views over the same records. Use Name (Title), Status (Status: To do, In progress, Done), Priority (Select: High, Medium, Low), Due (Date), Notes (Text) and Link (URL). The existing saved-article library is a separate database.
+
+To connect the app:
+
+1. Open Second Brain Tasks → **••• → Connections**, and add the integration used by the app’s `NOTION_TOKEN`. It needs Read, Insert and Update content capabilities. The connected Notion plugin and the app’s integration have independent access.
+2. Configure `NOTION_TOKEN` and a `LIBRARY_EDIT_KEY` of at least 16 characters in the Vercel environments you use. The board uses the same edit key as Add book. Neither credential goes into frontend code.
+3. Set the server variable `NOTION_TASKS_DATA_SOURCE_ID` to the task database’s **data source ID**, rather than the database page ID. Database identifiers are server configuration; do not commit them or private workspace links to the repository. The app obtains its Notion table link only after unlocking.
+4. Redeploy, open Kanban, and unlock with your edit key.
+
+App edits save directly to Notion. Changes made in Notion are fetched every minute while the board is visible, when returning to the tab, or with Refresh. This is periodic synchronization; simultaneous edits to the same property use the last saved value. Only changed fields are submitted when editing, preserving unrelated properties and unchanged rich text. Writes are not automatically retried; refresh after an uncertain save before retrying.
+
+All task API methods, including reads, require the edit key and return `private, no-store` responses. The key stays only in page memory; Lock or reload clears it. The server checks that a task belongs to the configured task data source before updating it. Task requests never mutate the article database or any page content.
+
+Validation: 34 automated tests cover the library and task flow, including task validation, pagination, creation, status moves, clearing optional properties, database membership, Notion errors and access protection. Browser checks exercised the real task API handler against a simulated Notion service: unlock, create, edit, move menu, drag-and-drop, Notion refresh, search, failed saves, locking, theme switching and layouts at 320px and 390px. Live app-to-Notion task writes remain unverified until the deployment integration has access and credentials.
+
 A personal library for the existing `my-brain` Notion database. The frontend groups your saves into concept books arranged as compact upright spines on one wooden shelf. More books scroll horizontally instead of adding rows of full covers. Clicking a spine lifts its full cover within the reader and swings it open to reveal the contents spread; the animation stays clipped to the book’s bounds. Chapters reveal articles, notes, original tags, and saved dates. The animation adapts to mobile, respects reduced motion, and can be dismissed at any point. Article links open in a new tab. Light and dark modes follow your system initially and remember your manual choice.
 
 The Notion table has been migrated: `Concept` and `Subconcept` are Select properties, and `Saved` is now an explicit Date. The original 11 rows retained every title, URL, tag, note, and visible saved timestamp. The reader uses those seven properties. Add book appends Concept options, and optionally Subconcept options, while retaining all existing options by ID. Tags retain their original spelling and remain separate, including `big`, `brains`, and `big-brains`.

@@ -10,13 +10,14 @@
   <script src="theme.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="books.css">
+  <link rel="stylesheet" href="tasks.css">
   <script type="module" src="app.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a href="/" class="brand" aria-label="Library home"><span class="library-mark" aria-hidden="true">▥</span> SECOND BRAIN <span class="brand-divider">/</span> <span class="brand-light">PERSONAL LIBRARY</span></a>
-      <div class="topbar-actions"><button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">☾</button><button class="connection-status" id="connection-button" aria-label="View Notion connection status"><span class="status-dot"></span><span id="connection-label">Notion snapshot</span><span class="small-arrow">↗</span></button></div>
+      <div class="topbar-actions"><a class="app-nav" href="tasks.html">Kanban</a><button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">☾</button><button class="connection-status" id="connection-button" aria-label="View Notion connection status"><span class="status-dot"></span><span id="connection-label">Notion snapshot</span><span class="small-arrow">↗</span></button></div>
     </header>
     <main>
       <section class="hero" aria-labelledby="page-title">

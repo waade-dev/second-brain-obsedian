@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>Amith’s tasks — Second Brain</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="books.css">
+  <link rel="stylesheet" href="tasks.css">
+  <script type="module" src="tasks.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a href="/" class="brand"><span class="library-mark" aria-hidden="true">▥</span> SECOND BRAIN <span class="brand-divider">/</span> <span class="brand-light">PERSONAL LIBRARY</span></a>
+      <div class="topbar-actions"><a class="app-nav" href="/">Library</a><a class="app-nav" href="tasks.html" aria-current="page">Kanban</a><button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">☾</button></div>
+    </header>
+    <main>
+      <section class="hero task-hero" aria-labelledby="page-title">
+        <div><p class="eyebrow">A LITTLE SPACE FOR WHAT’S NEXT</p><h1 id="page-title">Ideas into <em>motion.</em></h1><p class="hero-description">One task at a time. The same board here and in Notion.</p><p id="task-count" class="task-count">Your next chapter starts here.</p></div>
+        <a id="notion-board-link" class="notion-board-link" target="_blank" rel="noopener noreferrer" hidden>Open task table in Notion ↗</a>
+      </section>
+      <div class="task-toolbar">
+        <div class="search-wrap"><label class="sr-only" for="task-search">Search tasks</label><input id="task-search" type="search" placeholder="Find a task…" disabled></div>
+        <label class="sr-only" for="priority-filter">Filter by priority</label><select id="priority-filter" disabled><option value="">All priorities</option><option>High</option><option>Medium</option><option>Low</option></select>
+        <button id="task-refresh" class="icon-button" aria-label="Refresh tasks" disabled>↻</button>
+        <button id="lock-board" class="task-secondary" hidden>Lock</button><button id="add-task" class="task-primary" disabled>＋ New task</button>
+      </div>
+      <div id="unlock-panel" class="unlock-panel"><div><h2>Your space to get things done.</h2><p>Unlock with your library edit key to view and update your tasks.</p></div><button id="unlock-board" class="task-primary">Unlock board</button></div>
+      <p id="task-message" class="task-message" role="status" aria-live="polite"></p>
+      <section id="task-board" class="task-board" aria-label="Task Kanban board" aria-busy="false"></section>
+      <p class="task-footnote">Drag a card to change its status, or use its Move menu. Notion changes refresh every minute while this page is open.</p>
+    </main>
+    <footer><span>SMALL STEPS, GOOD MOMENTUM <span class="footer-star">✳</span></span><span><a href="/">Back to the library ↗</a></span></footer>
+  </div>
+  <dialog id="unlock-dialog" aria-labelledby="unlock-title"><form id="unlock-form"><button type="button" class="dialog-close" data-close="unlock-dialog" aria-label="Close unlock">×</button><p class="eyebrow">YOUR SECOND BRAIN</p><h2 id="unlock-title">A little focus.</h2><label for="task-edit-key">Library edit key</label><input id="task-edit-key" type="password" required autocomplete="off"><p class="field-hint">Your key is kept only in this page’s memory until you lock or reload.</p><p id="unlock-error" class="form-error" role="alert"></p><button type="submit" class="task-primary">Unlock board</button></form></dialog>
+  <dialog id="task-dialog" aria-labelledby="task-dialog-title"><button type="button" class="dialog-close" data-close="task-dialog" aria-label="Close task">×</button><p class="eyebrow">MAKE ROOM FOR WHAT MATTERS</p><h2 id="task-dialog-title">A new task.</h2><form id="task-form">
+    <label for="task-name">Task name</label><input id="task-name" maxlength="200" required placeholder="What’s the next step?">
+    <div class="task-form-row"><div><label for="task-status">Status</label><select id="task-status"></select></div><div><label for="task-priority">Priority</label><select id="task-priority"><option value="">No priority</option><option>High</option><option>Medium</option><option>Low</option></select></div></div>
+    <label for="task-due">Due date <span>(optional)</span></label><input id="task-due" type="date">
+    <label for="task-notes">Notes <span>(optional)</span></label><textarea id="task-notes" rows="3" maxlength="2000" placeholder="A little context for your future self…"></textarea>
+    <label for="task-link">Link <span>(optional)</span></label><input id="task-link" type="url" maxlength="2000" placeholder="https://…">
+    <p id="task-error" class="form-error" role="alert"></p><button id="save-task" type="submit" class="task-primary">Save task in Notion ↗</button>
+  </form></dialog>
+</body>
+</html>
