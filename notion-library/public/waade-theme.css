@@ -1,0 +1,23 @@
+/* Waade: shared visual language. Content, layouts and application behavior remain site-owned. */
+:root,:root[data-theme="dark"],:root[data-theme="light"],:root.dark{
+ --waade-bg:#10110f;--waade-panel:#151612;--waade-raised:#1e2119;--waade-text:#d9d8c4;--waade-muted:#929587;--waade-dim:#78806f;--waade-border:#33372c;--waade-accent:#d3e99b;--waade-warm:#ce9870;--waade-soft:#d3e99b0d;--waade-mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+ --bg:var(--waade-bg);--paper:var(--waade-bg);--panel:var(--waade-panel);--white:var(--waade-panel);--surface:var(--waade-panel);--surface-2:var(--waade-raised);--card:var(--waade-panel);--ink:var(--waade-text);--text:var(--waade-text);--fg:var(--waade-text);--muted:var(--waade-muted);--ink-2:var(--waade-muted);--dim:var(--waade-dim);--ink-3:var(--waade-dim);--faint:var(--waade-dim);--line:var(--waade-border);--border:var(--waade-border);--hairline:var(--waade-border);--accent:var(--waade-accent);--blue:var(--waade-accent);--purple:var(--waade-accent);--sage:var(--waade-accent);--green:var(--waade-accent);--orange:var(--waade-warm);--warm:var(--waade-warm);--pale:var(--waade-soft);--blue-wash:var(--waade-soft);--accent-soft:var(--waade-soft);--accent-soft-2:#d3e99b20;--accent-hover:#e2f1ba;--sans:var(--waade-mono);--serif:var(--waade-mono);--mono:var(--waade-mono);--radius:3px;--shadow:none;color-scheme:dark;
+}
+:root[data-theme="light"],:root[data-theme="paper"]{--waade-bg:#eeece4;--waade-panel:#e6e4da;--waade-raised:#deded1;--waade-text:#2f352b;--waade-muted:#606655;--waade-dim:#6d7464;--waade-border:#c7cbbc;--waade-accent:#526b2f;--waade-warm:#9c613e;--waade-soft:#526b2f0d;--accent-hover:#405923;color-scheme:light}
+html,body{background:var(--waade-bg);color:var(--waade-text)}
+body,button,input,select,textarea{font-family:var(--waade-mono)}
+h1,h2,h3,h4,h5,h6{font-family:var(--waade-mono);font-weight:400;letter-spacing:-.035em}
+h1 em,h2 em,h3 em{font-style:normal;color:var(--waade-accent)}
+button,input,select,textarea{border-radius:3px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--waade-accent);outline-offset:4px}
+::selection{background:var(--waade-accent);color:var(--waade-bg)}
+.eyebrow,.mini-label,.kicker,.section-label{font-family:var(--waade-mono);letter-spacing:.09em}
+
+:root,:root[data-theme=dark],:root[data-theme=light]{--page:var(--waade-panel);--page-muted:var(--waade-raised);--soft-ink:var(--waade-muted);--shadow-ink:#0003}
+body{font-size:14px}.hero h1{font-family:var(--waade-mono);font-size:clamp(34px,4.5vw,65px);font-weight:400;line-height:1.15;letter-spacing:-.05em}.hero h1 em{font-style:normal;color:var(--waade-accent)}
+.topbar,.toolbar,.task-toolbar,.card,.task-card,.task-column,.unlock-panel,.book-reader,.book-dialog,dialog,.search-wrap,.view-switch,.collection-card{background:var(--waade-panel);border-color:var(--waade-border);border-radius:3px;box-shadow:none}
+button,input,select,.theme-toggle,.book-tabs button{border-radius:3px}
+.task-primary,.primary-button,.connect-button{background:transparent;color:var(--waade-accent);border:1px solid var(--waade-accent)}
+.task-primary:hover,.primary-button:hover{background:var(--waade-accent);color:var(--waade-bg)}
+input,select,textarea{background:var(--waade-bg);color:var(--waade-text);border-color:var(--waade-border)}
+:root[data-theme=dark] .task-column,:root[data-theme=dark] .task-card{background:var(--waade-panel);border-color:var(--waade-border)}
