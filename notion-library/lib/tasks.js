@@ -80,7 +80,7 @@ export function taskClient({token, dataSourceId, fetchImpl = fetch}) {
       do {
         if (++pages > 50) throw new LibraryError('The board exceeds 5,000 tasks. Add incremental loading before showing this collection.', 422);
         if (pages > 1) await new Promise(resolve => setTimeout(resolve, 350));
-        const result = await request(`/data_sources/${dataSourceId}/query`, 'POST', {page_size: 100, sorts: [{property: 'Due', direction: 'ascending'}], ...(cursor ? {start_cursor: cursor} : {})});
+        const result = await request(`/data_sources/${dataSourceId}/query`, 'POST', {page_size: 100, ...(source.properties['Record type'] ? {filter: {or: [{property: 'Record type', select: {is_empty: true}}, {property: 'Record type', select: {does_not_equal: 'Work log'}}]}} : {}), sorts: [{property: 'Due', direction: 'ascending'}], ...(cursor ? {start_cursor: cursor} : {})});
         if (!Array.isArray(result.results) || (result.has_more && !result.next_cursor) || result.request_status?.incomplete_reason) throw new LibraryError('Notion returned an incomplete task list. Please refresh.', 502);
         rows.push(...result.results.filter(page => page.object === 'page' && !page.archived && !page.in_trash && !page.is_archived).map(mapTask));
         cursor = result.has_more ? result.next_cursor : null;
