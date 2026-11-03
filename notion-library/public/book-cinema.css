@@ -32,6 +32,12 @@
 .cinema-paper-back{transform:rotateY(180deg);background:linear-gradient(90deg,#ffffff33,transparent 85%,#b4a78c),#eae3d3}
 .cinema-paper-front::after,.cinema-paper-back::after{content:'';position:absolute;left:17%;right:17%;top:20%;height:55%;opacity:.2;background:repeating-linear-gradient(transparent 0 14px,#82735b 14px 15px,transparent 15px 24px);clip-path:polygon(0 0,100% 0,100% 84%,72% 84%,72% 100%,0 100%)}
 .cinema-shadow{position:absolute;height:45px;border-radius:50%;background:#000a;filter:blur(16px);transform-origin:center;opacity:0}
+.book-cinema-mobile{perspective:1100px;perspective-origin:50% 50%}
+.book-cinema-mobile .cinema-cover-front{padding:26px 23px}
+.book-cinema-mobile .cinema-cover-front .cover-title{font-size:clamp(24px,7.5vw,30px);margin:12px 0}
+.book-cinema-mobile .cinema-cover-front .cover-ornament{font-size:70px;max-height:120px}
+.book-cinema-mobile .cinema-cover-front .cover-subtitle{font-size:11px;line-height:1.5}
+.book-cinema-mobile .cinema-cover-front .cover-footer{padding-top:12px}
 .book-motion-skip{position:fixed;right:28px;bottom:25px;z-index:30;border:1px solid var(--line);background:var(--page);padding:10px 15px;color:var(--ink);font-size:10px;cursor:pointer}
 #book-dialog.cinema-opening .close-book{z-index:30}
 .page-fold-stage{position:absolute;perspective:1400px;pointer-events:none;overflow:hidden;z-index:4}
