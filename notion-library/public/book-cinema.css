@@ -1,0 +1,48 @@
+/* Physical covers, fanned leaves, and curved page turns. Runs only during interaction. */
+#book-dialog{box-shadow:0 35px 100px #0007,0 2px 4px #0004}
+#book-dialog::backdrop{background:#080b08b8;backdrop-filter:blur(9px)}
+.open-book-spread{position:relative;box-shadow:0 0 0 1px var(--line),3px 4px 0 var(--page-muted),5px 6px 0 var(--line)}
+.open-book-spread::after{content:'';position:absolute;left:calc(50% - 18px);top:0;bottom:0;width:36px;background:linear-gradient(90deg,transparent,#0002 44%,#0005 49%,#fff1 51%,#0002 57%,transparent);pointer-events:none;z-index:3}
+.open-book-cover{box-shadow:inset -16px 0 25px -20px #000c;background-image:linear-gradient(90deg,#fff1,transparent 8%,transparent 82%,#0003)}
+.open-book-right{position:relative;isolation:isolate}
+.shelf-spine{transition:transform .36s cubic-bezier(.2,.8,.2,1),box-shadow .36s;box-shadow:inset 2px 0 1px #fff2,inset -4px 0 7px #0002,3px 3px 4px #0003}
+.shelf-spine:hover,.shelf-spine:focus-visible{transform:translateY(-17px) rotateZ(-3deg);box-shadow:inset 2px 0 1px #fff3,12px 14px 20px #0004}
+#book-dialog.cinema-opening{overflow:visible;background:transparent;box-shadow:none}
+#book-dialog.cinema-opening .open-book-cover{visibility:visible}
+#book-dialog.cinema-opening .open-book-spread{opacity:0}
+.book-cinema{position:fixed;inset:0;z-index:10;pointer-events:none;overflow:hidden;perspective:1800px;perspective-origin:50% 48%}
+.cinema-book{position:absolute;transform-origin:center center;transform-style:preserve-3d;will-change:transform}
+.cinema-backboard{position:absolute;inset:0;border-radius:3px 8px 8px 3px;background:var(--cover);transform:translateZ(-11px);box-shadow:inset 0 0 0 1px #ffffff24,7px 15px 30px #0005}
+.cinema-spine{position:absolute;left:-10px;top:0;width:21px;height:100%;transform:rotateY(-90deg);transform-origin:right center;background:linear-gradient(90deg,#0004,#fff1 45%,#0002),var(--cover);border-radius:5px}
+.cinema-page-block{position:absolute;inset:4px 5px 5px 1px;transform:translateZ(-3px);background:linear-gradient(90deg,#c9bfaa,#f1ebdc 7%,#e7dfcd 96%,#c0b59d);border-radius:0 6px 6px 0;border-right:8px double #d4c9b1;box-shadow:inset 3px 0 8px #0002,4px 5px 0 #bbb099}
+.cinema-cover,.cinema-leaf{position:absolute;inset:0;transform-origin:left center;transform-style:preserve-3d;will-change:transform}
+.cinema-cover-front,.cinema-cover-lining,.cinema-paper-front,.cinema-paper-back{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:2px 7px 7px 2px;overflow:hidden}
+.cinema-cover-front{transform:translateZ(1px);padding:clamp(25px,4vw,48px);box-shadow:inset 3px 0 4px #0005,inset 0 0 0 1px #fff2,4px 9px 20px #0004}
+.cinema-cover-front .cover-volume{font-size:8px;margin-left:0;letter-spacing:1.7px;line-height:1.8}
+.cinema-cover-front .cover-ornament{font-size:104px;flex:1;max-height:230px;height:auto;min-height:60px;display:grid;place-items:center;text-shadow:0 1px #fff3,0 -1px #0005}
+.cinema-cover-front .cover-title{font-size:clamp(27px,3.5vw,44px);line-height:1.1;max-width:none;margin:18px 0 15px}
+.cinema-cover-front .cover-subtitle{font-size:15px;line-height:1.6}
+.cinema-cover-front .cover-footer{font-size:9px;flex-direction:row;padding-top:18px;line-height:1.7}
+.cinema-cover-front .cover-footer>span:last-child{font-size:7px}
+.cinema-cover-front::after{inset:13px;border-color:#f5dfb852}
+.cinema-cover-lining{transform:rotateY(180deg) translateZ(1px);background:radial-gradient(#ffffff0a .65px,transparent .65px) 0 0/4px 4px,linear-gradient(90deg,#fff1,transparent 80%,#0003),var(--cover);box-shadow:inset 0 0 0 1px #fff2}
+.cinema-cover-lining::after{content:'';position:absolute;inset:20px;border:1px solid #efdbb749}
+.cinema-cover-lining span{position:absolute;inset:0;display:grid;place-items:center;color:#efdbb780;font-size:70px}
+.cinema-paper-front,.cinema-paper-back{background:linear-gradient(90deg,#bcb19c,transparent 6%,transparent 93%,#fff5),#eae3d3;box-shadow:inset 0 0 0 1px #b5a88d66,4px 2px 8px #0002}
+.cinema-paper-back{transform:rotateY(180deg);background:linear-gradient(90deg,#ffffff33,transparent 85%,#b4a78c),#eae3d3}
+.cinema-paper-front::after,.cinema-paper-back::after{content:'';position:absolute;left:17%;right:17%;top:20%;height:55%;opacity:.2;background:repeating-linear-gradient(transparent 0 14px,#82735b 14px 15px,transparent 15px 24px);clip-path:polygon(0 0,100% 0,100% 84%,72% 84%,72% 100%,0 100%)}
+.cinema-shadow{position:absolute;height:45px;border-radius:50%;background:#000a;filter:blur(16px);transform-origin:center;opacity:0}
+.book-motion-skip{position:fixed;right:28px;bottom:25px;z-index:30;border:1px solid var(--line);background:var(--page);padding:10px 15px;color:var(--ink);font-size:10px;cursor:pointer}
+#book-dialog.cinema-opening .close-book{z-index:30}
+.page-fold-stage{position:absolute;perspective:1400px;pointer-events:none;overflow:hidden;z-index:4}
+.page-fold-strip{position:absolute;top:0;height:100%;transform-style:preserve-3d;will-change:transform}
+.page-fold-face{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--page);box-shadow:inset -1px 0 #00000006}
+.page-fold-face::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,#ffffff06,transparent 55%,#0000000d);pointer-events:none}
+.fold-content{position:absolute;top:0;box-sizing:border-box;overflow:hidden!important;pointer-events:none;background:var(--page);margin:0}
+.page-navigation{display:flex;align-items:center;gap:13px;margin-right:17px;margin-left:auto}
+.page-navigation button{border:0;background:none;color:var(--ink);font-size:9px;letter-spacing:0;padding:4px 0;cursor:pointer}
+.page-navigation button:hover{color:var(--purple)}.page-navigation button:disabled{color:var(--muted);opacity:.35;cursor:default}
+#book-page{touch-action:pan-y}
+@media(max-width:850px){.cinema-cover-front .cover-title{font-size:31px}.cinema-cover-front .cover-subtitle{font-size:13px}.cinema-cover-front .cover-footer{font-size:7px}.page-footer>span:first-child{font-size:5px;letter-spacing:.8px}}
+@media(max-width:700px){.open-book-spread::after{left:0;right:0;top:auto;bottom:auto;height:0;width:0}.cinema-cover-front{padding:32px 25px}.cinema-cover-front .cover-title{font-size:31px}.cinema-cover-front .cover-volume{font-size:6px}.cinema-cover-front .cover-subtitle{font-size:12px}.cinema-cover-front .cover-ornament{font-size:80px;max-height:170px}.cinema-cover-front .cover-footer{font-size:7px}.cinema-cover-front .cover-footer>span:last-child{font-size:6px}.book-motion-skip{right:20px;bottom:15px;font-size:9px}.page-footer{padding:11px 0;align-items:center;gap:10px}.page-footer>span:first-child{font-size:5px;letter-spacing:.4px}.page-navigation{gap:12px;margin-right:0}.page-navigation button{font-size:9px}.open-book-cover{box-shadow:inset 0 -12px 15px -15px #000c}}
+@media(prefers-reduced-motion:reduce){.book-cinema,.page-fold-stage,.book-motion-skip{display:none}.shelf-spine:hover,.shelf-spine:focus-visible{transform:none}.shelf-spine{transition:none}}

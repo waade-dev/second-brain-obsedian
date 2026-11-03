@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="tasks.css">
   <script type="module" src="app.js"></script>
   <link rel="stylesheet" href="waade-theme.css">
+  <link rel="stylesheet" href="book-cinema.css">
   <script defer src="./analytics.js"></script>
 </head>
 <body>
@@ -89,7 +90,7 @@
       <div class="open-book-right">
         <div class="book-search-bar"><label class="sr-only" for="book-search">Search inside this book</label><span aria-hidden="true">⌕</span><input id="book-search" type="search" placeholder="Find a chapter or saved idea…" autocomplete="off"><button id="clear-book-search" type="button" aria-label="Clear book search" hidden>×</button></div>
         <div id="book-page" tabindex="-1" aria-live="polite"></div>
-        <div class="page-footer"><span>SECOND BRAIN / PERSONAL LIBRARY</span><span id="page-number">00</span></div>
+        <div class="page-footer"><span>SECOND BRAIN / PERSONAL LIBRARY</span><nav class="page-navigation" aria-label="Page navigation"><button id="previous-chapter" type="button" aria-label="Previous chapter">← Previous</button><button id="next-chapter" type="button" aria-label="Next chapter">Next →</button></nav><span id="page-number">00</span></div>
       </div>
     </div>
   </dialog>

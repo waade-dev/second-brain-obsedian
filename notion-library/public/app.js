@@ -1,5 +1,5 @@
 import {CONCEPTS,safeURL,hostname,normalizeRows,normalizeConcepts,groupBooks,searchBook} from './library-model.js';
-import {animateBookOpening} from './book-motion.js';
+import {animateBookOpening,animatePageTurn} from './book-motion.js';
 import {fetchCollection} from './library-data.js';
 const $=id=>document.getElementById(id);
 const state={rows:[],concepts:[],concept:'All',tag:'All',query:'',sort:'topic',view:'shelf',live:false,fetching:false,lastSync:null,capturedAt:null,connectionError:'',error:'',openBook:null,chapter:null,bookQuery:''};
@@ -48,14 +48,15 @@ function render(){
 }
 function renderStatus(){$('connection-button').classList.toggle('live',state.live&&!state.error);$('connection-label').textContent=state.error&&state.live?'Sync paused':state.live?'Connected to Notion':'Live sync off';$('sync-message').textContent=state.error||(state.live?`Last checked ${new Date(state.lastSync).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}. New saves arrive automatically while this page is open.`:`Snapshot mode · ${plural(state.rows.length,'saved article')}${state.capturedAt?` · captured ${new Date(state.capturedAt).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})}`:''}. New Notion changes need a live connection.`);}
 function currentBook(){return allBooks().find(book=>book.name===state.openBook);}
-let returnFocus, cancelBookMotion;
-function openBook(name,trigger,chapter=null){cancelBookMotion?.();state.openBook=name;state.chapter=chapter;state.bookQuery='';$('book-search').value='';returnFocus=trigger;const dialog=$('book-dialog');renderOpenBook();if(!dialog.open)dialog.showModal();const book=currentBook();const fallback=makeCover(book,allBooks().findIndex(item=>item.name===name));if(!trigger.matches('.concept-book')){fallback.classList.add('motion-source');document.body.append(fallback);}cancelBookMotion=animateBookOpening(dialog,trigger,fallback);fallback.remove();}
+let returnFocus,cancelBookMotion,cancelPageTurn;
+function openBook(name,trigger,chapter=null){cancelBookMotion?.();cancelPageTurn?.();state.openBook=name;state.chapter=chapter;state.bookQuery='';$('book-search').value='';returnFocus=trigger;const dialog=$('book-dialog');renderOpenBook();if(!dialog.open)dialog.showModal();const book=currentBook();const fallback=makeCover(book,allBooks().findIndex(item=>item.name===name));cancelBookMotion=animateBookOpening(dialog,trigger,fallback);}
 function renderOpenBook(){
   const book=currentBook(),dialog=$('book-dialog');if(!book){dialog.close();return;}addStyles(dialog,book);$('open-book-title').textContent=book.name;$('open-book-description').textContent=book.description;$('open-book-volume').textContent=`${plural(book.chapters.length,'chapter')} · ${plural(book.rows.length,'saved article')}`;$('open-book-symbol').textContent=book.symbol;
   if(state.chapter&&!book.chapters.includes(state.chapter))state.chapter=null;
   const chapterList=$('chapter-list');chapterList.replaceChildren();const all=el('button',`chapter-button${!state.chapter?' active':''}`);all.append(el('span','','Contents'),el('span','chapter-count',String(book.rows.length)));all.setAttribute('aria-pressed',String(!state.chapter));all.addEventListener('click',()=>chooseChapter(null));chapterList.append(all);
   for(const [i,chapter]of book.chapters.entries()){const button=el('button',`chapter-button${state.chapter===chapter?' active':''}`);button.append(el('span','chapter-number',String(i+1).padStart(2,'0')),el('span','chapter-name',chapter),el('span','chapter-count',String(book.rows.filter(r=>r.Subconcept===chapter).length)));button.setAttribute('aria-pressed',String(state.chapter===chapter));button.addEventListener('click',()=>chooseChapter(chapter));chapterList.append(button);}
   const page=$('book-page');page.replaceChildren();$('clear-book-search').hidden=!state.bookQuery;
+  const chapterIndex=state.chapter?book.chapters.indexOf(state.chapter)+1:0;$('previous-chapter').disabled=chapterIndex===0;$('next-chapter').disabled=chapterIndex>=book.chapters.length;
   if(state.bookQuery.trim()){renderBookSearch(book,page);$('page-number').textContent='⌕';return;}
   if(!state.chapter){const title=el('div','page-heading');title.append(el('p','eyebrow','A MAP OF YOUR CURIOSITY'),el('h3','','The contents.'),el('p','page-intro',book.chapters.length?'Pick a chapter. There’s something good inside.':'Save a link to this concept in Notion to begin its first chapter.'));page.append(title);const contents=el('div','contents-list');for(const [i,chapter]of book.chapters.entries()){const button=el('button','contents-chapter');button.append(el('span','contents-number',String(i+1).padStart(2,'0')),el('span','contents-title',chapter),el('span','contents-dots'),el('span','contents-count',plural(book.rows.filter(r=>r.Subconcept===chapter).length,'find')),el('span','contents-arrow','↗'));button.addEventListener('click',()=>chooseChapter(chapter));contents.append(button);}page.append(contents,el('p','book-colophon','GOOD IDEAS DESERVE A PLACE TO LIVE.'));}
   else {const rows=book.rows.filter(row=>row.Subconcept===state.chapter);const heading=el('div','page-heading');heading.append(el('p','eyebrow',`CHAPTER ${String(book.chapters.indexOf(state.chapter)+1).padStart(2,'0')}`),el('h3','',state.chapter),el('p','page-intro',plural(rows.length,'saved find')));page.append(heading);const articles=el('div','chapter-articles');articles.append(...rows.map(row=>articleCard(row)));page.append(articles);}
@@ -86,7 +87,14 @@ function renderBookSearch(book,page){
   if(results.rows.length){const articles=el('div','chapter-articles');articles.append(...results.rows.map(row=>articleCard(row,state.bookQuery,true)));page.append(articles);}
   if(!results.chapters.length&&!results.rows.length){const empty=el('div','book-search-empty');empty.append(el('p','','No matches in this book. Try a chapter, title, note, or tag.'),el('p','field-hint','Words can appear in any order.'));page.append(empty);}
 }
-function chooseChapter(chapter){state.bookQuery='';$('book-search').value='';state.chapter=chapter;renderOpenBook();const page=$('book-page');page.classList.remove('turning');void page.offsetWidth;page.classList.add('turning');page.scrollTop=0;page.focus({preventScroll:true});}
+function chooseChapter(chapter){const book=currentBook();if(!book)return;const order=[null,...book.chapters],direction=order.indexOf(chapter)>=order.indexOf(state.chapter)?1:-1;cancelPageTurn?.();const page=$('book-page');cancelPageTurn=animatePageTurn(page,()=>{state.bookQuery='';$('book-search').value='';state.chapter=chapter;renderOpenBook();page.scrollTop=0;page.focus({preventScroll:true});},direction);}
+function stepChapter(direction){const book=currentBook();if(!book)return;const order=[null,...book.chapters],index=order.indexOf(state.chapter)+direction;if(index>=0&&index<order.length)chooseChapter(order[index]);}
+$('previous-chapter').addEventListener('click',()=>stepChapter(-1));$('next-chapter').addEventListener('click',()=>stepChapter(1));
+document.addEventListener('keydown',event=>{if(!$('book-dialog').open||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)||event.altKey||event.ctrlKey||event.metaKey)return;if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();stepChapter(event.key==='ArrowRight'?1:-1);}});
+let pageTouch;
+$('book-page').addEventListener('pointerdown',event=>{if(event.pointerType==='touch'&&!event.target.closest('a,button,input'))pageTouch={x:event.clientX,y:event.clientY};});
+$('book-page').addEventListener('pointercancel',()=>{pageTouch=null;});
+$('book-page').addEventListener('pointerup',event=>{if(!pageTouch)return;const dx=event.clientX-pageTouch.x,dy=event.clientY-pageTouch.y;pageTouch=null;if(Math.abs(dx)>70&&Math.abs(dy)<35)stepChapter(dx<0?1:-1);});
 async function refresh(fresh=false){
   if(state.fetching)return;
   const before=JSON.stringify([state.rows,state.concepts,state.live,state.error]);
@@ -107,7 +115,7 @@ async function refresh(fresh=false){
 }
 $('search').addEventListener('input',event=>{state.query=event.target.value;renderBooks();});$('sort').addEventListener('change',event=>{state.sort=event.target.value;renderBooks();});$('tag-select').addEventListener('change',event=>{state.tag=event.target.value;renderBooks();});
 for(const [id,view]of [['shelf-view','shelf'],['topics-view','topics']])$(id).addEventListener('click',()=>{state.view=view;render();});
-$('refresh').addEventListener('click',()=>refresh(true));$('close-book').addEventListener('click',()=>$('book-dialog').close());$('book-dialog').addEventListener('close',()=>{cancelBookMotion?.();cancelBookMotion=null;state.openBook=null;state.chapter=null;if(returnFocus?.isConnected)returnFocus.focus();else $('shelf-view').focus();});
+$('refresh').addEventListener('click',()=>refresh(true));$('close-book').addEventListener('click',()=>$('book-dialog').close());$('book-dialog').addEventListener('close',()=>{cancelBookMotion?.();cancelPageTurn?.();cancelBookMotion=null;cancelPageTurn=null;state.openBook=null;state.chapter=null;if(returnFocus?.isConnected)returnFocus.focus();else $('shelf-view').focus();});
 let creatingBook=false;
 $('add-book').addEventListener('click',()=>{$('add-book-error').textContent='';$('add-book-dialog').showModal();$('new-book-name').focus();});
 $('close-add-book').addEventListener('click',()=>{if(!creatingBook)$('add-book-dialog').close();});
@@ -126,8 +134,8 @@ $('add-book-form').addEventListener('submit',async event=>{
   }catch(error){$('add-book-error').textContent=error.name==='TimeoutError'?'Saving took too long. Refresh Notion to check whether the book was created before retrying.':error.message;}
   finally{creatingBook=false;$('create-book').disabled=false;$('close-add-book').disabled=false;$('create-book').textContent='Create book in Notion ↗';}
 });
-$('book-search').addEventListener('input',event=>{state.bookQuery=event.target.value;renderOpenBook();$('book-page').scrollTop=0;});
-$('clear-book-search').addEventListener('click',()=>{state.bookQuery='';$('book-search').value='';renderOpenBook();$('book-search').focus();});
+$('book-search').addEventListener('input',event=>{cancelPageTurn?.();state.bookQuery=event.target.value;renderOpenBook();$('book-page').scrollTop=0;});
+$('clear-book-search').addEventListener('click',()=>{cancelPageTurn?.();state.bookQuery='';$('book-search').value='';renderOpenBook();$('book-search').focus();});
 for(const id of ['book-dialog','connection-dialog','add-book-dialog'])$(id).addEventListener('click',event=>{if(event.target===$(id)){if(id==='add-book-dialog'&&creatingBook)return;const box=event.target.getBoundingClientRect();if(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)$(id).close();}});
 $('connection-button').addEventListener('click',()=>{$('connection-detail').textContent=state.live&&!state.error?'my-brain powers your concept books and chapters. New links and concept options are checked every minute while the library is open.':`${state.connectionError||'The live connection is not configured.'} ${state.live?'Your last connected collection is retained.':'You’re viewing a saved snapshot.'} For local preview, set NOTION_TOKEN and NOTION_DATABASE_ID in .env.local and refresh. For hosting, set them in Vercel and redeploy.`;$('connection-dialog').showModal();});
 document.addEventListener('keydown',event=>{if(event.key==='/'&&!['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)&&!$('book-dialog').open&&!$('connection-dialog').open){event.preventDefault();$('search').focus();}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refresh();});setInterval(()=>{if(document.visibilityState==='visible')refresh();},60000);refresh();
