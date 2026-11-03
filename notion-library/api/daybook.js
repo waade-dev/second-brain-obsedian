@@ -9,6 +9,7 @@ export default async function handler(req,res){
     if(req.method!=='POST'){res.setHeader('Allow','POST');return res.status(405).json({error:'Use POST.'});}
     let body=req.body;if(body===undefined){const chunks=[];let size=0;for await(const chunk of req){size+=Buffer.byteLength(chunk);if(size>16384)throw new LibraryError('Details are too long.',413);chunks.push(Buffer.from(chunk));}body=Buffer.concat(chunks).toString();}if(typeof body==='string')body=JSON.parse(body);if(!body||Array.isArray(body)||typeof body!=='object'||Buffer.byteLength(JSON.stringify(body))>16384)throw new LibraryError('Send valid workspace details.',400);
     const client=daybookClient({token:process.env.NOTION_TOKEN,dataSourceId:process.env.NOTION_TASKS_DATA_SOURCE_ID});
+    if(body.action==='setup')return res.status(200).json(await client.setup());
     if(body.action==='state')return res.status(200).json(await client.state(body.month));
     if(body.action==='saveLog')return res.status(200).json(await client.saveLog(body));
     if(body.action==='createTask')return res.status(201).json(await client.createTask(body.task));
