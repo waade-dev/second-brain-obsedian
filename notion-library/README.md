@@ -118,3 +118,9 @@ Every open book has a search field above its contents. Search checks chapter nam
 Add book requires the live Notion token, database access, Update content permission, and `LIBRARY_EDIT_KEY`. A snapshot cannot save new books. API writes were verified against mocked Notion responses; a real save still awaits server credential configuration. The UI also received a separate mock server check, which never wrote test data to Notion.
 
 Schema writes use Notion’s [Update data source properties](https://developers.notion.com/reference/update-data-source-properties) endpoint. Every existing Select option ID is included so omitted options are not removed.
+
+### Private Waade Daily workspace
+
+`api/daybook.js` reuses this app’s existing Notion token and task data source for the private Daily frontend. It requires a production-only `DAYBOOK_BRIDGE_KEY` shared with that frontend’s Vercel Function. Provider tokens never leave this backend. `Record type = Work log` and `Minutes` support one calendar log per day; regular task queries exclude those logs and preserve legacy tasks without a record type. Calendar and Kanban view IDs are configured with `NOTION_DAYBOOK_CALENDAR_VIEW_ID` and `NOTION_DAYBOOK_BOARD_VIEW_ID`.
+
+The server-only `setup` and `setupViews` actions initialize missing properties and idempotently create the calendar view for the configured source. They are unavailable through the frontend API. They do not accept arbitrary data source IDs or Notion request paths.
