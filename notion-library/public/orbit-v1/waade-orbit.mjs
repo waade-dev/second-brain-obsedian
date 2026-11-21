@@ -12,6 +12,9 @@ export function mountOrbitPicker({root=document.documentElement,groups,storageKe
  const toData = groups => (groups||[]).map((group,index)=>({...group,category:group.id,number:index+1}));
  const palette=root.querySelector('[data-orbit-palette]'), heading=panel.querySelector('[data-orbit-heading]'), back=panel.querySelector('[data-orbit-back]');
  const chart=createOrbitChart(svg);
+ const controller=new AbortController();
+ const listen=(target,type,request)=>target?.addEventListener(type,request,{signal:controller.signal});
+ if(heading)heading.tabIndex=-1;
  let selection, entries=[], opened=false;
  const paletteValue=theme=>{
   const next=palettes.includes(theme)?theme:'mush';
@@ -49,14 +52,15 @@ export function mountOrbitPicker({root=document.documentElement,groups,storageKe
   root.dataset.orbitLayout=opened?'orbit':'original';
   toggle.setAttribute('aria-pressed',String(opened));
   if(panel.id)toggle.setAttribute('aria-controls',panel.id);
+  if(!opened&&panel.contains(document.activeElement))toggle.focus({preventScroll:true});
   panel.hidden=!opened;
   if(remember)save(storageKey,root.dataset.orbitLayout);
   onLayout?.(opened);
   render();
  }
- toggle.addEventListener('click',()=>set(opened?'original':'orbit',true));
- back?.addEventListener('click',()=>choose(undefined));
- panel.addEventListener('click',event=>{
+ listen(toggle,'click',()=>set(opened?'original':'orbit',true));
+ listen(back,'click',()=>choose(undefined));
+ listen(panel,'click',event=>{
   const id=event.target.closest('[data-orbit-view]')?.dataset.orbitView;
   if(!id||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
   if(id==='@center'){event.preventDefault();choose(undefined);return;}
@@ -64,15 +68,16 @@ export function mountOrbitPicker({root=document.documentElement,groups,storageKe
   const item=selection.items.find(item=>item.id===id);
   if(item&&onActivate&&!item.href){event.preventDefault();onActivate({item,group:selection,trigger:event.target.closest('[data-orbit-view]')});}
  });
- panel.addEventListener('keydown',event=>{if(event.key==='Escape'&&selection){event.preventDefault();choose(undefined);}});
- for(const type of ['focusin','pointerover'])panel.addEventListener(type,event=>chart.highlight(event.target.closest('[data-orbit-view]')?.dataset.orbitView));
- panel.addEventListener('pointerleave',()=>chart.highlight(document.activeElement?.dataset.orbitView));
- palette?.addEventListener('change',()=>{paletteValue(palette.value);save(themeKey,palette.value);});
- addEventListener('storage',event=>{
+ listen(panel,'keydown',event=>{if(event.key==='Escape'&&selection){event.preventDefault();choose(undefined);}});
+ for(const type of ['focusin','pointerover'])listen(panel,type,event=>chart.highlight(event.target.closest('[data-orbit-view]')?.dataset.orbitView));
+ listen(panel,'pointerleave',()=>chart.highlight(document.activeElement?.dataset.orbitView));
+ listen(palette,'change',()=>{paletteValue(palette.value);save(themeKey,palette.value);});
+ listen(window,'storage',event=>{
   if(managePalette&&event.key===themeKey)paletteValue(event.newValue);
   if(event.key===storageKey)set(event.newValue);
  });
- if('ResizeObserver' in window)new ResizeObserver(draw).observe(svg.parentElement);
+ const observer='ResizeObserver' in window?new ResizeObserver(draw):null;
+ observer?.observe(svg.parentElement);
  function setGroups(groups){
   const selectedId=selection?.id;
   data=toData(groups);
@@ -84,5 +89,5 @@ export function mountOrbitPicker({root=document.documentElement,groups,storageKe
  if(managePalette)paletteValue(read(themeKey));
  toggle.hidden=false;if(palette)palette.hidden=false;
  set(read(storageKey));
- return {set,setGroups};
+ return {set,setGroups,destroy(){controller.abort();observer?.disconnect();}};
 }
