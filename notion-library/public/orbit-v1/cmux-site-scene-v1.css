@@ -1,0 +1,59 @@
+/* CMUX decorative scene only. Keep each tool, data panel and document opaque. */
+:root[data-orbit-theme=cmux] body {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  background: transparent;
+}
+:root[data-orbit-theme=cmux] body::before {
+  --scene-width: max(128vw, 178svh);
+  --scene-focus: 80vw;
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, #0a0c10b3 0%, #0a0c1080 28%, #0a0c1038 54%, transparent 75%, #0a0c1029),
+    url('./cmux-orbit-t3-scene.webp');
+  background-repeat: no-repeat;
+  background-size: cover, var(--scene-width) auto;
+  background-position: center, calc(var(--scene-focus) - var(--scene-width) * .61) top;
+  opacity: .76;
+}
+:root[data-orbit-theme=cmux] :is([data-orbit-picker], [data-orbit-field], [data-orbit-panel]) {
+  background: transparent;
+}
+:root[data-orbit-theme=cmux] :is([data-orbit-heading], [data-orbit-links] > *) {
+  width: fit-content;
+  max-width: 100%;
+  padding-inline: .4em;
+  background: #0a0c10db;
+  border-radius: 4px;
+}
+:root[data-orbit-theme=cmux] [data-orbit-heading] { padding-block: .18em; }
+:root[data-orbit-theme=cmux] :is(.hero h1, .hero-footnote, .eyebrow, .hero-description) {
+  text-shadow: 0 2px 5px #0a0c10, 0 0 8px #0a0c10;
+}
+:root[data-orbit-theme=cmux] [data-orbit-field] :is(.lens-label, .lens-title, .lens-number, .branch-title) {
+  paint-order: stroke fill;
+  stroke: #0a0c10;
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+:root[data-orbit-theme=cmux] [data-orbit-field] .lens-branch { opacity: .67; }
+@media (max-width: 720px) {
+  :root[data-orbit-theme=cmux] body::before {
+    --scene-width: max(125vw, 145svh);
+    --scene-focus: 60vw;
+    background-image:
+      linear-gradient(180deg, #0a0c1066 0%, transparent 23%, #0a0c104d 47%, #0a0c10 82%),
+      url('./cmux-orbit-t3-scene.webp');
+  }
+}
+@media print {
+  :root[data-orbit-theme=cmux] body::before { display: none; }
+}
+:root[data-orbit-theme=cmux] :is(.collection-heading,.stats,.library-controls,.sync-message) { background:#0c1016dc; }
+:root[data-orbit-theme=cmux] .topbar { background:#151c26ed; }
+:root[data-orbit-theme=cmux] :is(.hero-description,.eyebrow,.stats) { color:var(--waade-text); }
