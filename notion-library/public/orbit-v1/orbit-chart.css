@@ -1,0 +1,24 @@
+.lens-guide { fill: none; stroke: color-mix(in srgb,var(--muted) 44%,transparent); stroke-width: .7; stroke-dasharray: 1 4; }
+.lens-title { fill: var(--ink); font: 11px var(--mono); letter-spacing: .015em; }
+.lens-point { cursor: pointer; color: var(--star); }
+.lens-branch, .lens-flow, .lens-leader, .lens-fan { fill: none; stroke: currentColor; }
+.lens-branch { opacity: .43; stroke-width: 1; }
+.lens-flow { stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 2 98; stroke-dashoffset: -48; pointer-events: none; }
+:root[data-motion=on] .lens-flow { animation: orbit-stream 2.7s linear infinite; }
+@keyframes orbit-stream { to { stroke-dashoffset: -148; } }
+.lens-fan { opacity: .67; stroke-width: .65; }
+.lens-leader { opacity: .53; stroke-width: .7; stroke-dasharray: 2 3; }
+.lens-label { fill: var(--ink); font: 10px var(--mono); }
+.lens-halo { fill: var(--panel); stroke: currentColor; stroke-width: .8; }
+.lens-core { fill: currentColor; }
+.lens-number { fill: currentColor; font: 7px var(--mono); }
+.lens-center circle { fill: var(--panel); stroke: var(--warm); }
+.lens-center text { fill: var(--warm); font: 17px var(--mono); }
+.lens-point:is(:focus-visible,:hover,.is-lit) .lens-halo { fill: var(--raised, var(--panel)); stroke-width: 1.8; }
+.lens-point:is(:focus-visible,:hover,.is-lit) :is(.lens-fan,.lens-branch,.lens-label) { opacity: 1; color: var(--warm); fill: none; }
+.lens-point:is(:focus-visible,:hover,.is-lit) .lens-label { fill: var(--accent); }
+.lens-tick { stroke: var(--muted); stroke-width: .65; }
+.lens-threads { fill: none; stroke: currentColor; stroke-width: .55; opacity: .48; }
+
+/* Keep colored markers discernible against the light Paper field. */
+:root[data-theme=paper] .lens-point { color: color-mix(in srgb, var(--star) 34%, var(--ink)); }

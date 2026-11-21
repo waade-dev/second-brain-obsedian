@@ -7,7 +7,7 @@ import handler from './api/library.js';
 import booksHandler from './api/books.js';
 import tasksHandler from './api/tasks.js';
 const publicDir = path.resolve(fileURLToPath(new URL('./public/', import.meta.url)));
-const mime = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'application/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml'};
+const mime = {'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.js':'application/javascript; charset=utf-8','.mjs':'application/javascript; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml'};
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,'http://localhost');
   if(['/api/library','/api/books','/api/tasks'].includes(url.pathname)) {
