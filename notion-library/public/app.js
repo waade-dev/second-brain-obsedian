@@ -2,6 +2,25 @@ import {CONCEPTS,safeURL,hostname,normalizeRows,normalizeConcepts,groupBooks,sea
 import {animateBookOpening,animatePageTurn} from './book-motion.js';
 import {fetchCollection} from './library-data.js';
 const $=id=>document.getElementById(id);
+let libraryOrbit, shownOrbitGroups = '';
+function updateLibraryOrbit(books){
+  if(!libraryOrbit)return;
+  const groups=books.map(book=>({
+    id:'book:'+book.name, name:book.name,
+    items:[{id:'@book',name:'Open book',chapter:null},
+      ...book.chapters.map(chapter=>({id:'chapter:'+chapter,name:chapter,chapter}))]
+  }));
+  const identity=JSON.stringify(groups);
+  if(identity!==shownOrbitGroups){shownOrbitGroups=identity;libraryOrbit.setGroups(groups);}
+}
+import('./orbit-v1/waade-orbit.mjs').then(({mountOrbitPicker})=>{
+  libraryOrbit=mountOrbitPicker({
+    groups:[],storageKey:'second-brain-library-layout',managePalette:false,
+    onActivate({group,item,trigger}){openBook(group.name,trigger,item.chapter);},
+    onLayout:syncLibraryView
+  });
+  updateLibraryOrbit(visibleBooks());
+}).catch(()=>{ /* The original library stays available if a map asset fails. */ });
 const state={rows:[],concepts:[],concept:'All',tag:'All',query:'',sort:'topic',view:'shelf',live:false,fetching:false,lastSync:null,capturedAt:null,connectionError:'',error:'',openBook:null,chapter:null,bookQuery:''};
 function el(type,className,text){const node=document.createElement(type);if(className)node.className=className;if(text!==undefined)node.textContent=text;return node;}
 function plural(number,word){return `${number} ${word}${number===1?'':'s'}`;}
@@ -32,7 +51,7 @@ function makeSpine(book,index){
   button.addEventListener('click',()=>openBook(book.name,button));return button;
 }
 function renderBooks(){
-  const books=visibleBooks(),count=books.reduce((n,book)=>n+book.rows.length,0);
+  const books=visibleBooks();updateLibraryOrbit(books);const count=books.reduce((n,book)=>n+book.rows.length,0);
   $('collection').replaceChildren();$('result-count').textContent=`${plural(books.length,'book')} · ${plural(count,'article')}`;
   $('collection-title').textContent=state.query?'Your discoveries':state.concept==='All'?'A shelf for every curiosity':state.concept;
   $('collection-hint').textContent='PICK A SPINE. OPEN A BOOK.';
@@ -40,10 +59,13 @@ function renderBooks(){
   if(state.view==='shelf'){const shelf=el('div','concept-shelf');const track=el('div','book-track concept-spine-track');track.setAttribute('aria-label','Concept books on the shelf');track.append(...books.map(makeSpine));const bookend=el('span','bookend');bookend.setAttribute('aria-hidden','true');track.append(bookend);shelf.append(track,el('div','shelf-wood'));const caption=el('div','shelf-caption');caption.append(el('span','shelf-name','✦  Pick a spine. There’s something good inside.'),el('span','shelf-number','VOLUME ONE · ALWAYS GROWING'));shelf.append(caption);$('collection').append(shelf);}
   else {const grid=el('div','concept-index');for(const [i,book]of books.entries()){const card=el('article','index-card');addStyles(card,book);const top=el('div','index-top');top.append(el('span','index-symbol',book.symbol),el('span','index-volume',`VOL. ${String(i+1).padStart(2,'0')}`));card.append(top,el('h3','',book.name),el('p','',book.description));const chapters=el('div','index-chapters');if(!book.chapters.length){const open=el('button','index-chapter','Open this book ↗');open.addEventListener('click',()=>openBook(book.name,open));chapters.append(open);}for(const [j,chapter]of book.chapters.entries()){const button=el('button','index-chapter');button.append(el('span','',`${String(j+1).padStart(2,'0')}  ${chapter}`),el('span','',String(book.rows.filter(row=>row.Subconcept===chapter).length)));button.addEventListener('click',()=>openBook(book.name,button,chapter));chapters.append(button);}card.append(chapters);grid.append(card);}$('collection').append(grid);}
 }
+function syncLibraryView(orbit=document.documentElement.dataset.orbitLayout==='orbit'){
+  for(const [id,value]of [['shelf-view','shelf'],['topics-view','topics']]){$(id).classList.toggle('active',!orbit&&state.view===value);$(id).setAttribute('aria-pressed',String(!orbit&&state.view===value));}
+}
 function render(){
   const books=allBooks();$('stats').replaceChildren();for(const [i,[value,label]]of [[books.length,'concept books'],[state.rows.length,'saved finds'],[books.reduce((n,b)=>n+b.chapters.length,0),'chapters']].entries()){if(i)$('stats').append(el('span','stat-divider'));const stat=el('span');stat.append(el('strong','',value),document.createTextNode(` ${label}`));$('stats').append(stat);}
   renderFilters();const selected=state.tag;$('tag-select').replaceChildren(new Option('All original tags','All'));for(const tag of [...new Set(state.rows.flatMap(r=>r.Tags))].sort())$('tag-select').append(new Option(tag,tag));$('tag-select').value=selected;
-  for(const [id,value]of [['shelf-view','shelf'],['topics-view','topics']]){$(id).classList.toggle('active',state.view===value);$(id).setAttribute('aria-pressed',String(state.view===value));}
+  syncLibraryView();
   renderBooks();renderStatus();if($('book-dialog').open)renderOpenBook();
 }
 function renderStatus(){$('connection-button').classList.toggle('live',state.live&&!state.error);$('connection-label').textContent=state.error&&state.live?'Sync paused':state.live?'Connected to Notion':'Live sync off';$('sync-message').textContent=state.error||(state.live?`Last checked ${new Date(state.lastSync).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}. New saves arrive automatically while this page is open.`:`Snapshot mode · ${plural(state.rows.length,'saved article')}${state.capturedAt?` · captured ${new Date(state.capturedAt).toLocaleDateString([],{day:'numeric',month:'short',year:'numeric'})}`:''}. New Notion changes need a live connection.`);}
@@ -114,8 +136,8 @@ async function refresh(fresh=false){
   }
 }
 $('search').addEventListener('input',event=>{state.query=event.target.value;renderBooks();});$('sort').addEventListener('change',event=>{state.sort=event.target.value;renderBooks();});$('tag-select').addEventListener('change',event=>{state.tag=event.target.value;renderBooks();});
-for(const [id,view]of [['shelf-view','shelf'],['topics-view','topics']])$(id).addEventListener('click',()=>{state.view=view;render();});
-$('refresh').addEventListener('click',()=>refresh(true));$('close-book').addEventListener('click',()=>$('book-dialog').close());$('book-dialog').addEventListener('close',()=>{cancelBookMotion?.();cancelPageTurn?.();cancelBookMotion=null;cancelPageTurn=null;state.openBook=null;state.chapter=null;if(returnFocus?.isConnected)returnFocus.focus();else $('shelf-view').focus();});
+for(const [id,view]of [['shelf-view','shelf'],['topics-view','topics']])$(id).addEventListener('click',()=>{libraryOrbit?.set('original',true);state.view=view;render();});
+$('refresh').addEventListener('click',()=>refresh(true));$('close-book').addEventListener('click',()=>$('book-dialog').close());$('book-dialog').addEventListener('close',()=>{cancelBookMotion?.();cancelPageTurn?.();cancelBookMotion=null;cancelPageTurn=null;state.openBook=null;state.chapter=null;if(returnFocus?.isConnected)returnFocus.focus();else (document.documentElement.dataset.orbitLayout==='orbit'?$('orbit-library-toggle'):$('shelf-view')).focus();});
 let creatingBook=false;
 $('add-book').addEventListener('click',()=>{$('add-book-error').textContent='';$('add-book-dialog').showModal();$('new-book-name').focus();});
 $('close-add-book').addEventListener('click',()=>{if(!creatingBook)$('add-book-dialog').close();});

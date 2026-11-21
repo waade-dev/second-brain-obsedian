@@ -7,20 +7,22 @@
   <meta name="description" content="A little home for everything worth coming back to. Amith's personal reading library, connected to Notion.">
   <title>Amith's library — Second Brain</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <script src="theme.js"></script>
+  <script src="appearance-v1.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="books.css">
   <link rel="stylesheet" href="tasks.css">
   <script type="module" src="app.js"></script>
   <link rel="stylesheet" href="waade-theme.css">
   <link rel="stylesheet" href="book-cinema.css">
+  <link rel="stylesheet" href="appearance-v1.css">
+  <link rel="stylesheet" href="orbit-v1/waade-orbit.css">
   <script defer src="./analytics.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a href="/" class="brand" aria-label="Library home"><span class="library-mark" aria-hidden="true">▥</span> SECOND BRAIN <span class="brand-divider">/</span> <span class="brand-light">PERSONAL LIBRARY</span></a>
-      <div class="topbar-actions"><a class="app-nav" href="tasks.html">Kanban</a><button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">☾</button><button class="connection-status" id="connection-button" aria-label="View Notion connection status"><span class="status-dot"></span><span id="connection-label">Notion snapshot</span><span class="small-arrow">↗</span></button></div>
+      <div class="topbar-actions"><a class="app-nav" href="tasks.html">Kanban</a><button class="orbit-library-toggle" id="orbit-library-toggle" data-orbit-toggle type="button" aria-pressed="false" aria-controls="library-orbit" hidden><span aria-hidden="true">◉</span> Orbit</button><label class="library-setting"><span class="sr-only">Color palette</span><select data-library-palette><option value="mush">Mush</option><option value="carbon">Carbon</option><option value="moss">Moss</option><option value="paper">Paper</option><option value="cmux">CMUX</option></select></label><button class="connection-status" id="connection-button" aria-label="View Notion connection status"><span class="status-dot"></span><span id="connection-label">Notion snapshot</span><span class="small-arrow">↗</span></button></div>
     </header>
     <main>
       <section class="hero" aria-labelledby="page-title">
@@ -47,6 +49,14 @@
       </section>
       <div class="collection-heading"><div><span class="section-marker" aria-hidden="true"></span><h2 id="collection-title">The whole collection</h2><span id="result-count"></span></div><div class="collection-actions"><span class="collection-hint" id="collection-hint">PICK A SPINE. FOLLOW YOUR CURIOSITY.</span><button id="add-book" class="add-book-button">＋ Add book</button></div></div>
       <p id="library-notice" class="library-notice" role="status" hidden></p>
+      <section id="library-orbit" data-orbit-picker aria-label="Explore the library in Orbit" hidden>
+        <div data-orbit-field><svg role="group" aria-label="Circular book picker"></svg></div>
+        <div data-orbit-panel>
+          <button data-orbit-back type="button" hidden>← All books</button>
+          <h2 data-orbit-heading tabindex="-1">Choose a book</h2>
+          <nav data-orbit-links aria-label="Orbit groups"></nav>
+        </div>
+      </section>
       <section id="collection" class="collection" aria-label="Saved articles" aria-live="polite"></section>
       <p id="sync-message" class="sync-message" role="status"></p>
     </main>

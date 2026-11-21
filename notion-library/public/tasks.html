@@ -6,19 +6,20 @@
   <meta name="theme-color" content="#10110f">
   <title>Amith’s tasks — Second Brain</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <script src="theme.js"></script>
+  <script src="appearance-v1.js"></script>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="books.css">
   <link rel="stylesheet" href="tasks.css">
   <script type="module" src="tasks.js"></script>
   <link rel="stylesheet" href="waade-theme.css">
+  <link rel="stylesheet" href="appearance-v1.css">
   <script defer src="./analytics.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a href="/" class="brand"><span class="library-mark" aria-hidden="true">▥</span> SECOND BRAIN <span class="brand-divider">/</span> <span class="brand-light">PERSONAL LIBRARY</span></a>
-      <div class="topbar-actions"><a class="app-nav" href="/">Library</a><a class="app-nav" href="tasks.html" aria-current="page">Kanban</a><button id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">☾</button></div>
+      <div class="topbar-actions"><a class="app-nav" href="/">Library</a><a class="app-nav" href="tasks.html" aria-current="page">Kanban</a><label class="library-setting"><span class="sr-only">Color palette</span><select data-library-palette><option value="mush">Mush</option><option value="carbon">Carbon</option><option value="moss">Moss</option><option value="paper">Paper</option><option value="cmux">CMUX</option></select></label></div>
     </header>
     <main>
       <section class="hero task-hero" aria-labelledby="page-title">
