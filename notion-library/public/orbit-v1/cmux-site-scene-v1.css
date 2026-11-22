@@ -57,3 +57,11 @@
 :root[data-orbit-theme=cmux] :is(.collection-heading,.stats,.library-controls,.sync-message) { background:#0c1016dc; }
 :root[data-orbit-theme=cmux] .topbar { background:#151c26ed; }
 :root[data-orbit-theme=cmux] :is(.hero-description,.eyebrow,.stats) { color:var(--waade-text); }
+
+/* Set the decorative note in the space between the headline and the portrait.
+   The actionable Notion link keeps its original place at every width. */
+@media (min-width: 1200px) {
+  :root[data-orbit-theme=cmux] .hero-aside .paper-note {
+    transform: translate(clamp(-286px, -21vw, -250px), 36px) rotate(-4deg);
+  }
+}
